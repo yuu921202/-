@@ -1,0 +1,999 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>單字小考</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #19202a;
+      --muted: #64717d;
+      --paper: #f7f8f5;
+      --panel: #ffffff;
+      --line: #d9dfdd;
+      --nav: #213044;
+      --nav-soft: #2f425d;
+      --accent: #087d82;
+      --accent-ink: #05565a;
+      --warm: #b86120;
+      --good: #167447;
+      --bad: #b43b2a;
+      --focus: #f3c85f;
+      --shadow: 0 18px 45px rgba(27, 36, 48, .10);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      background:
+        linear-gradient(90deg, rgba(8,125,130,.10) 0 16px, transparent 16px),
+        linear-gradient(180deg, #fbfbf8, var(--paper));
+      font-family: "Segoe UI", "Noto Sans TC", "Microsoft JhengHei", Arial, sans-serif;
+      letter-spacing: 0;
+    }
+
+    button, input, select {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .app {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 292px minmax(0, 1fr);
+    }
+
+    .sidebar {
+      color: white;
+      background: var(--nav);
+      padding: 24px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .mark {
+      width: 46px;
+      height: 46px;
+      flex: 0 0 auto;
+      border: 1px solid rgba(255,255,255,.28);
+      border-radius: 8px;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 4px;
+      padding: 6px;
+      background: rgba(255,255,255,.08);
+    }
+
+    .mark span {
+      border-radius: 4px;
+      background: #f3c85f;
+    }
+
+    .mark span:nth-child(2) { background: #66c2b8; }
+    .mark span:nth-child(3) { background: #ee8b62; }
+    .mark span:nth-child(4) { background: #f6f1df; }
+
+    h1 {
+      margin: 0;
+      font-size: 1.42rem;
+      line-height: 1.15;
+      font-weight: 800;
+    }
+
+    .brand small {
+      display: block;
+      color: rgba(255,255,255,.72);
+      margin-top: 4px;
+      font-size: .82rem;
+    }
+
+    .nav-tabs {
+      display: grid;
+      gap: 8px;
+    }
+
+    .nav-tabs button,
+    .primary,
+    .ghost {
+      border: 0;
+      border-radius: 8px;
+      min-height: 42px;
+      padding: 10px 12px;
+      transition: transform .16s ease, background .16s ease, border-color .16s ease;
+    }
+
+    .nav-tabs button {
+      text-align: left;
+      color: rgba(255,255,255,.78);
+      background: transparent;
+    }
+
+    .nav-tabs button.active {
+      color: white;
+      background: var(--nav-soft);
+    }
+
+    .side-box {
+      border-top: 1px solid rgba(255,255,255,.18);
+      padding-top: 18px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .side-box label {
+      color: rgba(255,255,255,.72);
+      font-size: .85rem;
+      display: grid;
+      gap: 6px;
+    }
+
+    .side-box select {
+      width: 100%;
+      border: 1px solid rgba(255,255,255,.18);
+      border-radius: 8px;
+      color: white;
+      background: #172538;
+      padding: 9px 10px;
+    }
+
+    .stat-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .stat {
+      min-height: 70px;
+      border: 1px solid rgba(255,255,255,.14);
+      border-radius: 8px;
+      padding: 10px;
+      background: rgba(255,255,255,.06);
+    }
+
+    .stat strong {
+      display: block;
+      font-size: 1.35rem;
+    }
+
+    .stat span {
+      color: rgba(255,255,255,.65);
+      font-size: .78rem;
+    }
+
+    main {
+      min-width: 0;
+      padding: 24px;
+      display: grid;
+      align-content: start;
+      gap: 18px;
+    }
+
+    .toolbar {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .toolbar h2 {
+      margin: 0;
+      font-size: 1.2rem;
+    }
+
+    .toolbar p {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: .92rem;
+    }
+
+    .segmented {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .segmented button {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      min-height: 38px;
+      padding: 8px 12px;
+      color: var(--ink);
+      background: var(--panel);
+    }
+
+    .segmented button.active {
+      color: white;
+      border-color: var(--accent);
+      background: var(--accent);
+    }
+
+    .quiz-panel,
+    .list-panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+    }
+
+    .quiz-panel {
+      min-height: 520px;
+      padding: 22px;
+      display: grid;
+      grid-template-rows: auto auto minmax(210px, auto) auto;
+      gap: 18px;
+    }
+
+    .progress-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 12px;
+      align-items: center;
+      color: var(--muted);
+      font-size: .9rem;
+    }
+
+    .meter {
+      height: 9px;
+      background: #e9eeeb;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .meter span {
+      display: block;
+      width: 0%;
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--warm));
+      transition: width .22s ease;
+    }
+
+    .question {
+      display: grid;
+      gap: 10px;
+      align-content: center;
+      min-height: 148px;
+      padding: 18px;
+      border-left: 5px solid var(--accent);
+      background: #f9fbfa;
+      border-radius: 8px;
+    }
+
+    .question-label {
+      color: var(--muted);
+      font-size: .88rem;
+    }
+
+    .question-text {
+      margin: 0;
+      font-size: clamp(1.45rem, 2vw, 2.05rem);
+      line-height: 1.35;
+      font-weight: 800;
+      overflow-wrap: anywhere;
+    }
+
+    .source {
+      min-height: 22px;
+      color: var(--muted);
+      font-size: .86rem;
+    }
+
+    .options {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      align-content: start;
+    }
+
+    .option {
+      width: 100%;
+      min-height: 74px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 14px;
+      color: var(--ink);
+      background: white;
+      text-align: left;
+      line-height: 1.35;
+      overflow-wrap: anywhere;
+    }
+
+    .option:hover,
+    .option:focus-visible,
+    .primary:hover,
+    .ghost:hover,
+    .segmented button:hover {
+      transform: translateY(-1px);
+    }
+
+    .option.correct {
+      border-color: rgba(22,116,71,.45);
+      background: #edf8f1;
+    }
+
+    .option.wrong {
+      border-color: rgba(180,59,42,.42);
+      background: #fff0ec;
+    }
+
+    .feedback {
+      min-height: 28px;
+      font-weight: 700;
+      color: var(--muted);
+    }
+
+    .feedback.good { color: var(--good); }
+    .feedback.bad { color: var(--bad); }
+
+    .actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .primary {
+      color: white;
+      background: var(--accent);
+      padding-inline: 18px;
+    }
+
+    .ghost {
+      color: var(--accent-ink);
+      background: #eaf6f5;
+      padding-inline: 16px;
+    }
+
+    .typing {
+      display: grid;
+      gap: 12px;
+    }
+
+    .typing input {
+      width: 100%;
+      min-height: 52px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px 14px;
+      font-size: 1.05rem;
+    }
+
+    .typing .answer {
+      min-height: 44px;
+      color: var(--muted);
+      overflow-wrap: anywhere;
+    }
+
+    .summary {
+      display: grid;
+      gap: 14px;
+      align-content: center;
+      min-height: 360px;
+      text-align: center;
+    }
+
+    .summary strong {
+      display: block;
+      font-size: clamp(2.4rem, 7vw, 5rem);
+      line-height: 1;
+    }
+
+    .miss-list {
+      max-height: 220px;
+      overflow: auto;
+      text-align: left;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px 12px;
+      background: #fbfbfa;
+    }
+
+    .miss-list div {
+      padding: 7px 0;
+      border-bottom: 1px solid #edf0ee;
+    }
+
+    .miss-list div:last-child {
+      border-bottom: 0;
+    }
+
+    .list-panel {
+      padding: 18px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .list-tools {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 180px;
+      gap: 12px;
+    }
+
+    .list-tools input,
+    .list-tools select {
+      width: 100%;
+      min-height: 42px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 9px 11px;
+      background: white;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+    }
+
+    th, td {
+      padding: 10px 8px;
+      border-bottom: 1px solid #edf0ee;
+      text-align: left;
+      vertical-align: top;
+      overflow-wrap: anywhere;
+    }
+
+    th {
+      color: var(--muted);
+      font-size: .82rem;
+      font-weight: 700;
+    }
+
+    th:nth-child(1), td:nth-child(1) { width: 28%; }
+    th:nth-child(3), td:nth-child(3) { width: 16%; }
+
+    .hidden { display: none !important; }
+
+    @media (max-width: 900px) {
+      .app {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        position: static;
+        padding: 18px;
+      }
+
+      .stat-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+
+      main {
+        padding: 18px;
+      }
+
+      .toolbar,
+      .list-tools {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 620px) {
+      .options {
+        grid-template-columns: 1fr;
+      }
+
+      .quiz-panel {
+        padding: 16px;
+      }
+
+      .stat-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      th:nth-child(3), td:nth-child(3) {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="mark" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+        <div>
+          <h1>單字小考</h1>
+          <small id="datasetLabel">讀取中</small>
+        </div>
+      </div>
+
+      <nav class="nav-tabs" aria-label="主選單">
+        <button id="quizTab" class="active" type="button">小考</button>
+        <button id="listTab" type="button">單字表</button>
+      </nav>
+
+      <section class="side-box" aria-label="小考設定">
+        <label>
+          題型
+          <select id="modeSelect">
+            <option value="meaning-to-term">看中文選英文</option>
+            <option value="term-to-meaning">看英文選中文</option>
+            <option value="typing">中翻英打字</option>
+          </select>
+        </label>
+        <label>
+          範圍
+          <select id="chapterSelect"></select>
+        </label>
+        <label>
+          題數
+          <select id="countSelect">
+            <option value="10">10 題</option>
+            <option value="20" selected>20 題</option>
+            <option value="30">30 題</option>
+            <option value="50">50 題</option>
+            <option value="all">全部</option>
+          </select>
+        </label>
+        <button class="primary" id="startBtn" type="button">開始新小考</button>
+      </section>
+
+      <section class="side-box" aria-label="成績">
+        <div class="stat-grid">
+          <div class="stat"><strong id="scoreStat">0</strong><span>答對</span></div>
+          <div class="stat"><strong id="doneStat">0</strong><span>已答</span></div>
+          <div class="stat"><strong id="rateStat">0%</strong><span>正確率</span></div>
+          <div class="stat"><strong id="leftStat">0</strong><span>剩餘</span></div>
+        </div>
+      </section>
+    </aside>
+
+    <main>
+      <section id="quizView">
+        <div class="toolbar">
+          <div>
+            <h2 id="quizTitle">看中文選英文</h2>
+            <p id="quizSubtitle">Ch1 到 Ch7，共 477 個單字/片語</p>
+          </div>
+          <div class="segmented" role="group" aria-label="題型切換">
+            <button data-mode="meaning-to-term" class="active" type="button">中 → 英</button>
+            <button data-mode="term-to-meaning" type="button">英 → 中</button>
+            <button data-mode="typing" type="button">打字</button>
+          </div>
+        </div>
+
+        <div class="quiz-panel">
+          <div class="progress-row">
+            <div class="meter" aria-hidden="true"><span id="meterFill"></span></div>
+            <span id="progressText">0 / 0</span>
+          </div>
+
+          <div class="question">
+            <div class="question-label" id="questionLabel">題目</div>
+            <p class="question-text" id="questionText"></p>
+            <div class="source" id="sourceText"></div>
+          </div>
+
+          <div id="choiceArea" class="options"></div>
+          <div id="typingArea" class="typing hidden">
+            <input id="typingInput" type="text" autocomplete="off" spellcheck="false" placeholder="輸入英文單字或片語">
+            <div class="answer" id="typingAnswer"></div>
+          </div>
+
+          <div>
+            <div class="feedback" id="feedback"></div>
+            <div class="actions">
+              <button class="ghost" id="showAnswerBtn" type="button">顯示答案</button>
+              <button class="primary" id="nextBtn" type="button">下一題</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="listView" class="list-panel hidden">
+        <div class="toolbar">
+          <div>
+            <h2>單字表</h2>
+            <p id="listCount"></p>
+          </div>
+        </div>
+        <div class="list-tools">
+          <input id="searchInput" type="search" placeholder="搜尋英文、中文、來源">
+          <select id="listChapterSelect"></select>
+        </div>
+        <div style="overflow:auto">
+          <table>
+            <thead>
+              <tr><th>單字</th><th>意思</th><th>章節</th></tr>
+            </thead>
+            <tbody id="wordRows"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script id="vocab-data" type="application/json">[{"term": "pandemic", "meaning": "流行病；流行的", "definition": "(n) a disease that exists in almost all of an area, 流行病 (a) (of a disease) existing in almost all of an area, 流行的 Ex: In some parts of the world malaria(瘧疾) is still pandemic.", "source": "OneDrive_1_2026-4-28\\科技英文_ch1_單字解釋.pptx", "slide": "2"}, {"term": "coronavirus", "meaning": "冠狀病毒", "definition": "(n) a type of virus that causes diseases in humans and animals. In humans, it usually causes respiratory infections (= in the nose, throat, or chest) that are not serious, 冠狀病毒. Ex: SARS was a new strain of coronavirus.", "source": "OneDrive_1_2026-4-28\\科技英文_ch1_單字解釋.pptx", "slide": "3"}, {"term": "corona", "meaning": "身體組織冠，冠狀部", "definition": "(n) the top rounded part of a body part such as a tooth or the skull, （身體組織）冠，冠狀部,", "source": "OneDrive_1_2026-4-28\\科技英文_ch1_單字解釋.pptx", "slide": "4"}, {"term": "viral", "meaning": "病毒的", "definition": "(a) caused by a virus, 病毒的 Ex: Within days the film clip went viral.", "source": "OneDrive_1_2026-4-28\\科技英文_ch1_單字解釋.pptx", "slide": "5"}, {"term": "pneumonia", "meaning": "肺炎", "definition": "(n) a serious illness in which one or both lungs become inflamed and fill with fluid, 肺炎. Ex: The doctor checked whether the patient had pneumonia.", "source": "OneDrive_1_2026-4-28\\科技英文_ch1_單字解釋.pptx", "slide": "6"}, {"term": "symptom", "meaning": "疾病的癥狀", "definition": "(n) any feeling of illness or physical or mental change that is caused by a particular disease, （疾病的）癥狀 Ex: He's complaining of all the usual flu symptoms - a high temperature, headache, and so on.", "source": "OneDrive_1_2026-4-28\\科技英文_ch1_單字解釋.pptx", "slide": "7"}, {"term": "fever", "meaning": "發燒", "definition": "(n) a condition in which body temperature is higher than normal, 發燒. Ex: A high fever is a common symptom of infection.", "source": "OneDrive_1_2026-4-28\\科技英文_ch1_單字解釋.pptx", "slide": "9"}, {"term": "cough", "meaning": "咳，咳嗽", "definition": "(n) to force air out of your lungs through your throat with a short, loud sound, 咳，咳嗽 Ex: The smoke made me cough.", "source": "OneDrive_1_2026-4-28\\科技英文_ch1_單字解釋.pptx", "slide": "10"}, {"term": "fatigue", "meaning": "疲勞", "definition": "(n) extreme tiredness, especially caused by illness or hard work, 疲勞. Ex: Many patients reported fatigue after infection.", "source": "OneDrive_1_2026-4-28\\科技英文_ch1_單字解釋.pptx", "slide": "11"}, {"term": "smell", "meaning": "嗅覺；氣味", "definition": "(n) the ability to notice odors with the nose; a particular odor, 嗅覺；氣味. Ex: Some people temporarily lose their sense of smell.", "source": "OneDrive_1_2026-4-28\\科技英文_ch1_單字解釋.pptx", "slide": "12"}, {"term": "nasal", "meaning": "鼻的", "definition": "(a) related to the nose, 鼻的 Ex: nasal passages, 鼻道 Ex: nasal congestion, 鼻塞", "source": "OneDrive_1_2026-4-28\\科技英文_ch1_單字解釋.pptx", "slide": "13"}, {"term": "congestion", "meaning": "擁擠，阻塞", "definition": "(n) a situation in which a place is too blocked or crowded, causing difficulties, 擁擠，阻塞 Ex: These facilities are designed to ease the congestion of emergency rooms.", "source": "OneDrive_1_2026-4-28\\科技英文_ch1_單字解釋.pptx", "slide": "14"}, {"term": "conjunctivitis", "meaning": "結膜炎", "definition": "(n) a painful infection of the eyes that makes them red and makes the eyelids swollen and sticky, 結膜炎", "source": "OneDrive_1_2026-4-28\\科技英文_ch1_單字解釋.pptx", "slide": "15"}, {"term": "sore", "meaning": "痛的，疼痛的", "definition": "(a) painful and uncomfortable because of injury, infection, or too much use, 痛的，疼痛的 Ex: All the dust has made my eyes sore. Ex: sore throat, 喉嚨痛", "source": "OneDrive_1_2026-4-28\\科技英文_ch1_單字解釋.pptx", "slide": "16"}, {"term": "headache", "meaning": "頭痛", "definition": "(n) a pain in the head, 頭痛. Ex: She had a headache and a sore throat.", "source": "OneDrive_1_2026-4-28\\科技英文_ch1_單字解釋.pptx", "slide": "17"}, {"term": "muscle", "meaning": "肌肉", "definition": "(n) one of the tissues in the body that makes movement possible, 肌肉. Ex: COVID-19 may cause muscle pain.", "source": "OneDrive_1_2026-4-28\\科技英文_ch1_單字解釋.pptx", "slide": "18"}, {"term": "joint", "meaning": "關節", "definition": "(n) a place in your body where two bones are connected, 關節 Ex: an elbow/hip/knee joint, 肘/ 髖/ 膝關節", "source": "OneDrive_1_2026-4-28\\科技英文_ch1_單字解釋.pptx", "slide": "19"}, {"term": "diarrhea", "meaning": "腹瀉", "definition": "(n) an illness in which the body's solid waste is more liquid than usual and comes out of the body more often, 腹瀉 Ex: an attack of diarrhoea, 腹瀉發作", "source": "OneDrive_1_2026-4-28\\科技英文_ch1_單字解釋.pptx", "slide": "20"}, {"term": "rash", "meaning": "皮疹，疹子", "definition": "(n) a lot of small red spots on the skin, 皮疹，疹子 Ex: I've got an itchy(癢的) rash all over my chest.", "source": "OneDrive_1_2026-4-28\\科技英文_ch1_單字解釋.pptx", "slide": "21"}, {"term": "chill", "meaning": "寒冷;寒意，涼意", "definition": "(n) a feeling of cold, 寒冷;寒意，涼意 Ex: There was a chill in the air this morning.", "source": "OneDrive_1_2026-4-28\\科技英文_ch1_單字解釋.pptx", "slide": "22"}, {"term": "dizziness", "meaning": "眩暈", "definition": "(n) a temporary feeling that your sense of balance is not good and that you may fall down, 眩暈 Ex: The sight of blood may cause dizziness in some people.", "source": "OneDrive_1_2026-4-28\\科技英文_ch1_單字解釋.pptx", "slide": "23"}, {"term": "nausea", "meaning": "噁心，嘔吐感", "definition": "(n) the feeling that you are going to vomit, 噁心，嘔吐感 Ex: Signs of the illness include fever, nausea, and vomiting.", "source": "OneDrive_1_2026-4-28\\科技英文_ch1_單字解釋.pptx", "slide": "24"}, {"term": "vomiting", "meaning": "嘔吐", "definition": "(n) the act of bringing food or liquid up from the stomach through the mouth, 嘔吐. Ex: Severe nausea may lead to vomiting.", "source": "OneDrive_1_2026-4-28\\科技英文_ch1_單字解釋.pptx", "slide": "25"}, {"term": "severe", "meaning": "非常嚴重的；劇烈的；慘重的", "definition": "(a) causing very great pain, difficulty, worry, damage, etc.; very serious, 非常嚴重的；劇烈的；慘重的 Ex: In parts of Africa there is a severe food/water shortage.", "source": "OneDrive_1_2026-4-28\\科技英文_ch1_單字解釋.pptx", "slide": "26"}, {"term": "shortness of breath", "meaning": "呼吸急促；呼吸困難", "definition": "(n) difficulty breathing normally, 呼吸急促；呼吸困難. Ex: Shortness of breath can be a sign of severe disease.", "source": "OneDrive_1_2026-4-28\\科技英文_ch1_單字解釋.pptx", "slide": "27"}, {"term": "appetite", "meaning": "食慾，胃口", "definition": "(n) the feeling that you want to eat food, 食慾，胃口 Ex: All that walking has given me an appetite.", "source": "OneDrive_1_2026-4-28\\科技英文_ch1_單字解釋.pptx", "slide": "28"}, {"term": "confusion", "meaning": "困惑，糊塗;迷惑不解;混淆", "definition": "(n) a situation in which people do not understand what is happening, what they should do or who someone or something is, 困惑，糊塗;迷惑不解;混淆 Ex: There seems to be some confusion over who is actually giving the talk.", "source": "OneDrive_1_2026-4-28\\科技英文_ch1_單字解釋.pptx", "slide": "29"}, {"term": "chest", "meaning": "胸膛，胸部;胸腔", "definition": "(n) the upper front part of the body of humans and some animals, between the stomach and the neck, containing the heart and lungs, 胸膛，胸部;胸腔 Ex: He was shot in the chest at point blank range.", "source": "OneDrive_1_2026-4-28\\科技英文_ch1_單字解釋.pptx", "slide": "30"}, {"term": "irritability", "meaning": "易怒性情，暴脾氣", "definition": "(n) the quality of becoming annoyed very easily, 易怒性情，暴脾氣 Ex: The drug can cause irritability.", "source": "OneDrive_1_2026-4-28\\科技英文_ch1_單字解釋.pptx", "slide": "31"}, {"term": "consciousness", "meaning": "意識;感覺;覺悟", "definition": "(n) the state of understanding and realizing something, 意識;感覺;覺悟 Ex: Her consciousness that she's different makes her feel uneasy.", "source": "OneDrive_1_2026-4-28\\科技英文_ch1_單字解釋.pptx", "slide": "32"}, {"term": "anxiety", "meaning": "焦慮", "definition": "(n) a feeling of worry, nervousness, or fear, 焦慮. Ex: Long illness can cause anxiety in some patients.", "source": "OneDrive_1_2026-4-28\\科技英文_ch1_單字解釋.pptx", "slide": "33"}, {"term": "depression", "meaning": "憂鬱，抑鬱;消沉，沮喪", "definition": "(n) the state of feeling very unhappy and without hope for the future, 憂鬱，抑鬱;消沉，沮喪 Ex: I was overwhelmed by feelings of depression.", "source": "OneDrive_1_2026-4-28\\科技英文_ch1_單字解釋.pptx", "slide": "34"}, {"term": "disorder", "meaning": "混亂，淩亂，雜亂無章", "definition": "(n) a state of untidiness or lack of organization, 混亂，淩亂，雜亂無章 Ex: The whole office was in a state of disorder.", "source": "OneDrive_1_2026-4-28\\科技英文_ch1_單字解釋.pptx", "slide": "35"}, {"term": "neurological", "meaning": "神經的;神經系統的", "definition": "(a) relating to nerves, 神經的;神經系統的 Ex: Alzheimer's disease is a neurological disorder.", "source": "OneDrive_1_2026-4-28\\科技英文_ch1_單字解釋.pptx", "slide": "36"}, {"term": "complication", "meaning": "併發症 使情況複雜化的事物；複雜化", "definition": "(n) an extra medical problem that makes it more difficult to treat an existing illness, 併發症 (n) 使情況複雜化的事物；複雜化 Ex: If there are no complications, the doctor says that she'll be able to come home within two weeks.", "source": "OneDrive_1_2026-4-28\\科技英文_ch1_單字解釋.pptx", "slide": "37"}, {"term": "stroke", "meaning": "中風", "definition": "(n) a sudden change in the blood supply to a part of the brain, sometimes causing a loss of the ability to move particular parts of the body, 中風 Ex: She suffered/had a stroke that left her unable to speak.", "source": "OneDrive_1_2026-4-28\\科技英文_ch1_單字解釋.pptx", "slide": "38"}, {"term": "inflammation", "meaning": "炎症", "definition": "(n) a red, painful, and often swollen area in or on a part of your body,炎（症） Ex: Aspirin reduces pain and inflammation.", "source": "OneDrive_1_2026-4-28\\科技英文_ch1_單字解釋.pptx", "slide": "39"}, {"term": "delirium", "meaning": "因發燒或精神錯亂而神志不清;語無倫次", "definition": "(n) a state of being unable to think or speak clearly because of fever or mental confusion, （因發燒或精神錯亂而）神志不清;語無倫次 Ex: fever accompanied by delirium", "source": "OneDrive_1_2026-4-28\\科技英文_ch1_單字解釋.pptx", "slide": "40"}, {"term": "recover", "meaning": "康復；恢復", "definition": "(v) to become well again after an illness, 康復；恢復. Ex: Most people recover without hospital treatment.", "source": "OneDrive_1_2026-4-28\\科技英文_ch1_單字解釋.pptx", "slide": "41"}, {"term": "treatment", "meaning": "對待;待遇;處理", "definition": "(n) the way you deal with or behave towards someone or something, 對待;待遇;處理 Ex: Peter gets special treatment because he knows the boss.", "source": "OneDrive_1_2026-4-28\\科技英文_ch1_單字解釋.pptx", "slide": "42"}, {"term": "oxygen", "meaning": "氧氣", "definition": "(n) a gas in the air that people and animals need to breathe, 氧氣. Ex: Some seriously ill patients require oxygen.", "source": "OneDrive_1_2026-4-28\\科技英文_ch1_單字解釋.pptx", "slide": "43"}, {"term": "respiratory", "meaning": "呼吸的", "definition": "(a) relating to breathing, 呼吸的", "source": "OneDrive_1_2026-4-28\\科技英文_ch1_單字解釋.pptx", "slide": "44"}, {"term": "respiratory failure", "meaning": "呼吸衰竭", "definition": "(n) a dangerous condition in which the lungs cannot provide enough oxygen to the body, 呼吸衰竭. Ex: Respiratory failure needs immediate medical care.", "source": "OneDrive_1_2026-4-28\\科技英文_ch1_單字解釋.pptx", "slide": "45"}, {"term": "acute", "meaning": "十分嚴重的", "definition": "(a) If a bad situation is acute, it causes severe problems or damage, 十分嚴重的 Ex: She felt acute embarrassment at his behaviour.", "source": "OneDrive_1_2026-4-28\\科技英文_ch1_單字解釋.pptx", "slide": "46"}, {"term": "syndrome", "meaning": "併發症，症候群，綜合症狀", "definition": "(n) a combination of medical problems that shows the existence of a particular disease or mental condition, 併發症，症候群，綜合症狀 Ex: Early diagnosis of the syndrome is difficult, but it is important to begin treatment as soon as possible.", "source": "OneDrive_1_2026-4-28\\科技英文_ch1_單字解釋.pptx", "slide": "47"}, {"term": "sepsis", "meaning": "敗血症，膿毒症，膿毒病", "definition": "(n) a severe medical condition in which bacteria enter the blood after an operation or accident, 敗血症，膿毒症，膿毒病", "source": "OneDrive_1_2026-4-28\\科技英文_ch1_單字解釋.pptx", "slide": "48"}, {"term": "septic shock", "meaning": "敗血症性休克，感染性休克，膿毒性休克", "definition": "(n) 敗血症性休克，感染性休克，膿毒性休克 Ex: She was already in septic shock and died five days later.", "source": "OneDrive_1_2026-4-28\\科技英文_ch1_單字解釋.pptx", "slide": "49"}, {"term": "thromboembolism", "meaning": "血栓栓塞", "definition": "(n) the blocking of a blood vessel by a blood clot that travels through the bloodstream, 血栓栓塞. Ex: Doctors watch for thromboembolism in severe cases.", "source": "OneDrive_1_2026-4-28\\科技英文_ch1_單字解釋.pptx", "slide": "50"}, {"term": "kidney", "meaning": "腎，腎臟", "definition": "(n) either of a pair of small organs in the body that take away waste matter from the blood to produce urine, 腎，腎臟 Ex: kidney failure", "source": "OneDrive_1_2026-4-28\\科技英文_ch1_單字解釋.pptx", "slide": "51"}, {"term": "age", "meaning": "年齡", "definition": "(n) 年齡 (v) If someone ages or something ages them, they look older, 衰老，使…顯得蒼老 Ex: She's aged since the last time we met.", "source": "OneDrive_1_2026-4-28\\科技英文_ch1_單字解釋.pptx", "slide": "52"}, {"term": "underlying", "meaning": "暗含的;深層的;潛在的", "definition": "(a) real but not immediately obvious, 暗含的;深層的;潛在的 Ex: And what might be the underlying significance of these supposedly random acts?", "source": "OneDrive_1_2026-4-28\\科技英文_ch1_單字解釋.pptx", "slide": "53"}, {"term": "lung", "meaning": "肺，肺部", "definition": "(n) either of the two organs in the chest with which people and some animals breathe, 肺，肺部 Ex: lung cancer", "source": "OneDrive_1_2026-4-28\\科技英文_ch1_單字解釋.pptx", "slide": "54"}, {"term": "diabetes", "meaning": "糖尿病", "definition": "(n) a disease in which the body cannot control the level of sugar in the blood, 糖尿病 Ex: Diabetes is diagnosed with a blood test.", "source": "OneDrive_1_2026-4-28\\科技英文_ch1_單字解釋.pptx", "slide": "55"}, {"term": "obesity", "meaning": "肥胖", "definition": "(n) the fact of being extremely fat, in a way that is dangerous for health, 肥胖 Ex: The National Institute of Health is discussing ways of tackling the problem of childhood obesity.", "source": "OneDrive_1_2026-4-28\\科技英文_ch1_單字解釋.pptx", "slide": "56"}, {"term": "infect", "meaning": "疾病傳染，感染", "definition": "(v) to pass a disease to a person, animal, or plant, （疾病）傳染，感染 Ex: The ward was full of children infected with TB (肺結核).", "source": "OneDrive_1_2026-4-28\\科技英文_ch1_單字解釋.pptx", "slide": "57"}, {"term": "hospitalization", "meaning": "送…住院治療", "definition": "(n) the act of taking someone to hospital and keeping them there for treatment, 送…住院治療 Because of the severity of the accident, the patient required hospitalization.", "source": "OneDrive_1_2026-4-28\\科技英文_ch1_單字解釋.pptx", "slide": "58"}, {"term": "mutation", "meaning": "基因的突變，變異", "definition": "(n) the way in which genes change and produce permanent differences, （基因的）突變，變異 It is well known that radiation can cause mutation.", "source": "OneDrive_1_2026-4-28\\科技英文_ch1_單字解釋.pptx", "slide": "59"}, {"term": "variant", "meaning": "變體；變種；變形", "definition": "(n) something that is slightly different from other similar things 變體；變種；變形 There are many colas on the market now, all variants on the original drink.", "source": "OneDrive_1_2026-4-28\\科技英文_ch1_單字解釋.pptx", "slide": "60"}, {"term": "emerge", "meaning": "出現，浮現;露出", "definition": "(v) to appear by coming out of something or out from behind something, 出現，浮現;露出 She emerged from the sea, blue with cold.", "source": "OneDrive_1_2026-4-28\\科技英文_ch1_單字解釋.pptx", "slide": "61"}, {"term": "designate", "meaning": "指定，選定;委派", "definition": "(v) to choose someone officially to do a particular job 指定，選定;委派 Traditionally, the president designates his or her successor.", "source": "OneDrive_1_2026-4-28\\科技英文_ch1_單字解釋.pptx", "slide": "62"}, {"term": "announce", "meaning": "尤指公開地宣佈，宣告，通告", "definition": "(v) to make something known or tell people about something officially（尤指公開地）宣佈，宣告，通告 They announced the death of their mother in the local paper.", "source": "OneDrive_1_2026-4-28\\科技英文_ch1_單字解釋.pptx", "slide": "63"}, {"term": "transmissible", "meaning": "疾病等可傳播的", "definition": "(a) of diseases, etc., able to be passed from one person or animal to another, （疾病等）可傳播的 To start a pandemic, the virus will have to be highly transmissible between humans.", "source": "OneDrive_1_2026-4-28\\科技英文_ch1_單字解釋.pptx", "slide": "64"}, {"term": "claim", "meaning": "聲稱;宣稱;斷言;主張", "definition": "(v) to say that something is true or is a fact, although you cannot prove it and other people might not believe it, 聲稱;宣稱;斷言;主張 The company claims (that) it is not responsible for the pollution in the river.", "source": "OneDrive_1_2026-4-28\\科技英文_ch1_單字解釋.pptx", "slide": "65"}, {"term": "proportion", "meaning": "部分;份額", "definition": "(n) the number or amount of a group or part of something when compared to the whole, 部分;份額 Children make up a large proportion of the world's population.", "source": "OneDrive_1_2026-4-28\\科技英文_ch1_單字解釋.pptx", "slide": "66"}, {"term": "precaution", "meaning": "預防，預防措施", "definition": "(n) an action that is done to prevent something unpleasant or dangerous happening 預防，預防措施 Many people have been stockpiling food as a precaution against shortages.", "source": "OneDrive_1_2026-4-28\\科技英文_ch1_單字解釋.pptx", "slide": "68"}, {"term": "distance", "meaning": "保持距離", "definition": "(v) to make or maintain a personal or emotional separation from, to place or keep at a distance, 保持距離 They are able to distance themselves from the tragedy", "source": "OneDrive_1_2026-4-28\\科技英文_ch1_單字解釋.pptx", "slide": "69"}, {"term": "mask", "meaning": "面具，面罩", "definition": "(n) a covering for all or part of the face that protects, hides, or decorates the person wearing it 面具，面罩 The bank robbers wore masks throughout the raid", "source": "OneDrive_1_2026-4-28\\科技英文_ch1_單字解釋.pptx", "slide": "70"}, {"term": "ventilate", "meaning": "使通風;使空氣流通", "definition": "(v) to cause fresh air to enter and move around a closed space 使通風;使空氣流通 Ventilate the room well while applying the paint.", "source": "OneDrive_1_2026-4-28\\科技英文_ch1_單字解釋.pptx", "slide": "71"}, {"term": "bent", "meaning": "彎曲的;不直的;不平的", "definition": "(a) curved and not straight or flat 彎曲的;不直的;不平的 The metal bars were bent and twisted.", "source": "OneDrive_1_2026-4-28\\科技英文_ch1_單字解釋.pptx", "slide": "72"}, {"term": "elbow", "meaning": "肘;衣服的肘部", "definition": "(n) the part in the middle of the arm where it bends, or the part of a piece of clothing that covers this area 肘;（衣服的）肘部 Her arm was bandaged from the elbow to the fingers.", "source": "OneDrive_1_2026-4-28\\科技英文_ch1_單字解釋.pptx", "slide": "73"}, {"term": "tissue", "meaning": "面紙；動物或植物的細胞組織", "definition": "(n) 面紙 (n) a group of connected cells in an animal or plant that are similar to each other, have the same purpose, and form the stated part of the animal or plant, （動物或植物的細胞）組織 His face is covered with scar tissue where he was badly burned.", "source": "OneDrive_1_2026-4-28\\科技英文_ch1_單字解釋.pptx", "slide": "74"}, {"term": "molecular", "meaning": "分子的", "definition": "(a) relating to molecules (= the simplest units of a chemical substance), 分子的 Scientists can study the three-dimensional molecular structure of the proteins.", "source": "OneDrive_1_2026-4-28\\科技英文_ch1_單字解釋.pptx", "slide": "75"}, {"term": "detect", "meaning": "偵測；檢測出", "definition": "(v) to discover or notice something, especially something hard to see or measure, 偵測；檢測出. Ex: The test can detect the virus in a sample.", "source": "OneDrive_1_2026-4-28\\科技英文_ch1_單字解釋.pptx", "slide": "76"}, {"term": "confirm infection", "meaning": "確認感染", "definition": "(phr.) to prove that a person has a disease-causing virus or bacteria in the body, 確認感染. Ex: PCR tests help confirm infection.", "source": "OneDrive_1_2026-4-28\\科技英文_ch1_單字解釋.pptx", "slide": "77"}, {"term": "PCR", "meaning": "聚合酶連鎖反應", "definition": "(n) short for polymerase chain reaction, a lab method used to make tiny amounts of genetic material easier to detect, 聚合酶連鎖反應. Ex: PCR is widely used to test for SARS-CoV-2.", "source": "OneDrive_1_2026-4-28\\科技英文_ch1_單字解釋.pptx", "slide": "78"}, {"term": "sample", "meaning": "樣本", "definition": "(n) 樣本 (v) to take a sample of or from, especially: to judge the quality of by a sample Ex: sampled his output for defects Ex: sample a wine", "source": "OneDrive_1_2026-4-28\\科技英文_ch1_單字解釋.pptx", "slide": "79"}, {"term": "swab", "meaning": "棉花棒", "definition": "(n) a small piece of soft material used for cleaning a cut, 棉花棒 The nurse cleaned the cut on my leg with a swab.", "source": "OneDrive_1_2026-4-28\\科技英文_ch1_單字解釋.pptx", "slide": "80"}, {"term": "amplifying", "meaning": "擴大；增強", "definition": "(v) to increase the size or effect of something 擴大；增強 A funeral can amplify the feelings of regret and loss for the relatives.", "source": "OneDrive_1_2026-4-28\\科技英文_ch1_單字解釋.pptx", "slide": "81"}, {"term": "exposure", "meaning": "暴露；接觸", "definition": "(n) the state of being in contact with something harmful, such as a virus, 暴露；接觸. Ex: Symptoms may begin a few days after exposure.", "source": "OneDrive_1_2026-4-28\\科技英文_ch1_單字解釋.pptx", "slide": "82"}, {"term": "antigen", "meaning": "抗原", "definition": "(n) a substance that causes the body's immune system to react, especially by producing antibodies, 抗原 The biggest problem in the development of a vaccine is the identification of protective antigens.", "source": "OneDrive_1_2026-4-28\\科技英文_ch1_單字解釋.pptx", "slide": "83"}, {"term": "protein", "meaning": "蛋白質", "definition": "(n) one of the many substances found in food such as meat, cheese, fish, or eggs, that is necessary for the body to grow and be strong, 蛋白質 Meat and fish are a vital source of protein.", "source": "OneDrive_1_2026-4-28\\科技英文_ch1_單字解釋.pptx", "slide": "84"}, {"term": "reliable", "meaning": "可靠的", "definition": "(a) able to be trusted to work well or give correct results, 可靠的. Ex: Rapid tests are faster, but PCR is usually more reliable.", "source": "OneDrive_1_2026-4-28\\科技英文_ch1_單字解釋.pptx", "slide": "85"}, {"term": "circulate", "meaning": "循環;流通;傳遞;散佈", "definition": "(v) to go around or through something, or to make something go around or through something, 循環;流通;傳遞;散佈 Hot water circulates through the heating system", "source": "OneDrive_1_2026-4-28\\科技英文_ch1_單字解釋.pptx", "slide": "86"}, {"term": "sampling", "meaning": "the activity of providing or trying a small amount of a product so someone can decide whether to buy it", "definition": "(n) the activity of providing or trying a small amount of a product so someone can decide whether to buy it Ex: When it works, sampling can be the most effective form of advertising.", "source": "OneDrive_1_2026-4-28\\科技英文_ch1_單字解釋.pptx", "slide": "87"}, {"term": "isolation", "meaning": "隔離；分離；孤獨", "definition": "(n) the condition of being alone, especially when this makes you feel unhappy, 隔離；分離；孤獨 The prisoner had been kept in isolation for three days.", "source": "OneDrive_1_2026-4-28\\科技英文_ch1_單字解釋.pptx", "slide": "88"}, {"term": "quarantine", "meaning": "隔離檢疫期", "definition": "(n) a specific period of time in which a person or animal that has a disease, or may have one, must stay or be kept away from others in order to prevent the spread of the disease, 隔離檢疫期 The doctor said I could go home as long as I agreed to stay in quarantine for at least seven days.", "source": "OneDrive_1_2026-4-28\\科技英文_ch1_單字解釋.pptx", "slide": "89"}, {"term": "prevent", "meaning": "阻止，妨礙；預防", "definition": "(v) to stop something from happening or someone from doing something, 阻止，妨礙；預防 Label your suitcases to prevent confusion.", "source": "OneDrive_1_2026-4-28\\科技英文_ch1_單字解釋.pptx", "slide": "90"}, {"term": "contact", "meaning": "透過電話或寫電子郵件等聯繫，聯絡", "definition": "(v) to communicate with someone by calling or sending them a letter, email, etc. （透過電話或寫電子郵件等）聯繫，聯絡 I tried to contact him at his office, but he wasn't in.", "source": "OneDrive_1_2026-4-28\\科技英文_ch1_單字解釋.pptx", "slide": "91"}, {"term": "protection", "meaning": "保護；防護", "definition": "(n) the act of keeping someone or something safe from harm, 保護；防護. Ex: Vaccines provide strong protection against severe illness.", "source": "OneDrive_1_2026-4-28\\科技英文_ch1_單字解釋.pptx", "slide": "92"}, {"term": "immune", "meaning": "免疫的；水痘", "definition": "(a) protected against a particular disease by particular substances in the blood, 免疫的 Most people who've had chickenpox (水痘) once are immune to it for the rest of their lives.", "source": "OneDrive_1_2026-4-28\\科技英文_ch1_單字解釋.pptx", "slide": "93"}, {"term": "recognize", "meaning": "認出，認識;識別", "definition": "(v) to know someone or something because you have seen or heard him or her or experienced it before 認出，認識;識別 I hadn't seen her for 20 years, but I recognized her immediately.", "source": "OneDrive_1_2026-4-28\\科技英文_ch1_單字解釋.pptx", "slide": "94"}, {"term": "bacteria", "meaning": "細菌", "definition": "(n) very small living things, some of which can cause disease, 細菌. Ex: Vaccines train the immune system to fight viruses and bacteria.", "source": "OneDrive_1_2026-4-28\\科技英文_ch1_單字解釋.pptx", "slide": "95"}, {"term": "vaccination", "meaning": "接種疫苗", "definition": "(n) the process or an act of giving someone a vaccine (= a substance put into a person's body to prevent them getting a disease) 接種疫苗 All the children were given two vaccinations against measles (麻疹).", "source": "OneDrive_1_2026-4-28\\科技英文_ch1_單字解釋.pptx", "slide": "96"}, {"term": "preventive", "meaning": "防止的，預防的", "definition": "(a) intended to stop something before it happens 防止的，預防的 In the past ten years, preventive measures have radically reduced levels of tooth decay in children.", "source": "OneDrive_1_2026-4-28\\科技英文_ch1_單字解釋.pptx", "slide": "97"}, {"term": "sneeze", "meaning": "打噴嚏", "definition": "(v) When you sneeze, air and often small drops of liquid suddenly come out of your nose and mouth in a way you cannot control. 打噴嚏 Cats make him sneeze - I think he's allergic to them.", "source": "OneDrive_1_2026-4-28\\科技英文_ch1_單字解釋.pptx", "slide": "99"}, {"term": "efficacy", "meaning": "功效，效力，效能", "definition": "(n) the ability, especially of a medicine or a method of achieving something, to produce the intended result 功效，效力，效能 They recently ran a series of tests to measure the efficacy of the drug.", "source": "OneDrive_1_2026-4-28\\科技英文_ch1_單字解釋.pptx", "slide": "100"}, {"term": "vaccinate", "meaning": "給…接種疫苗", "definition": "(v) to give someone a vaccine, usually by injection, to prevent them from getting a disease 給…接種疫苗 The children were vaccinated against the major childhood diseases.", "source": "OneDrive_1_2026-4-28\\科技英文_ch1_單字解釋.pptx", "slide": "102"}, {"term": "chill guy", "meaning": "Someone that does not give a crap about a problem or argument and just stays chill. A calm, easygoing person who stays composed under stress", "definition": "(n) Someone that does not give a crap about a problem or argument and just stays chill. (n) A calm, easygoing person who stays composed under stress", "source": "OneDrive_1_2026-4-28\\科技英文_ch1_單字解釋.pptx", "slide": "103"}, {"term": "shortage", "meaning": "缺乏，缺少", "definition": "(n) a situation in which there is not enough of something, 缺乏，缺少 Ex: There's a shortage of food and shelter in the refugee camps.", "source": "OneDrive_1_2026-4-28\\科技英文_ch1_單字解釋.pptx", "slide": "104"}, {"term": "curse", "meaning": "咒語，詛咒，魔咒；禍根，禍因；禍害", "definition": "(n) magic words that are intended to bring bad luck to someone 咒語，詛咒，魔咒 (n) a cause of trouble and unhappiness, 禍根，禍因；禍害 Noise is the curse of modern city life.", "source": "OneDrive_1_2026-4-28\\科技英文_ch1_單字解釋.pptx", "slide": "105"}, {"term": "Grid", "meaning": "網格，方格;格柵，格子", "definition": "(n) a pattern or structure made from horizontal and vertical lines crossing each other to form squares. 網格，方格;格柵，格子 A metal grid had been placed over the hole to prevent people from falling in.", "source": "OneDrive_1_2026-4-28\\tesla_ch2_ultra_fullscreen.pptx", "slide": "2"}, {"term": "grid scale", "meaning": "Grid-scale storage refers to technologies connected to the power grid that can store energy and then supply it back to the grid at a more advantageous time – for example, at night, when no solar power is available, or during a weather event that disrupts electricity generation.", "definition": "(n) Grid-scale storage refers to technologies connected to the power grid that can store energy and then supply it back to the grid at a more advantageous time – for example, at night, when no solar power is available, or during a weather event that disrupts electricity generation.", "source": "OneDrive_1_2026-4-28\\tesla_ch2_ultra_fullscreen.pptx", "slide": "3"}, {"term": "electric vehicle", "meaning": "電動車", "definition": "(n) a vehicle powered by electricity instead of gasoline. 電動車 Tesla is one of the best-known electric vehicle companies in the world.", "source": "OneDrive_1_2026-4-28\\tesla_ch2_ultra_fullscreen.pptx", "slide": "4"}, {"term": "clean energy", "meaning": "清潔能源", "definition": "(n) energy that causes little or no pollution. 清潔能源 Solar power is a common source of clean energy.", "source": "OneDrive_1_2026-4-28\\tesla_ch2_ultra_fullscreen.pptx", "slide": "5"}, {"term": "battery", "meaning": "電池", "definition": "(n) a device that stores electricity and supplies power. 電池 A larger battery allows the car to travel farther.", "source": "OneDrive_1_2026-4-28\\tesla_ch2_ultra_fullscreen.pptx", "slide": "6"}, {"term": "solar", "meaning": "太陽能的；與太陽有關的", "definition": "(adj) relating to the sun or energy from the sun. 太陽能的；與太陽有關的 Many houses use solar panels to reduce electricity costs.", "source": "OneDrive_1_2026-4-28\\tesla_ch2_ultra_fullscreen.pptx", "slide": "7"}, {"term": "tribute", "meaning": "尤指在正式場合表達敬意的頌詞，禮物", "definition": "(n) something that you say or write that shows your respect and admiration for someone, especially on a formal occasion （尤指在正式場合表達敬意的）頌詞，禮物 Tributes have been pouring in from all over the world for the famous actor who died yesterday.", "source": "OneDrive_1_2026-4-28\\tesla_ch2_ultra_fullscreen.pptx", "slide": "8"}, {"term": "inventor", "meaning": "發明家", "definition": "(n) a person who creates a new device, idea, or process. 發明家 Nikola Tesla was a famous inventor and engineer.", "source": "OneDrive_1_2026-4-28\\tesla_ch2_ultra_fullscreen.pptx", "slide": "9"}, {"term": "electrical", "meaning": "電的;與電有關的", "definition": "relating to electricity. 電的;與電有關的 electrical equipment/goods/devices", "source": "OneDrive_1_2026-4-28\\tesla_ch2_ultra_fullscreen.pptx", "slide": "10"}, {"term": "CEO", "meaning": "執行長", "definition": "(n) chief executive officer; the highest-ranking manager in a company. 執行長 The CEO announced a new strategy for the company.", "source": "OneDrive_1_2026-4-28\\tesla_ch2_ultra_fullscreen.pptx", "slide": "11"}, {"term": "overarching", "meaning": "首要的；包羅萬象的，支配一切的", "definition": "most important, because of including or affecting all other areas. 首要的；包羅萬象的，支配一切的 The overarching theme of the election campaign was tax cuts.", "source": "OneDrive_1_2026-4-28\\tesla_ch2_ultra_fullscreen.pptx", "slide": "12"}, {"term": "expedite", "meaning": "迅速完成;促進;加快", "definition": "(v) to make something happen more quickly. 迅速完成;促進;加快 Something needs to be done to expedite the process.", "source": "OneDrive_1_2026-4-28\\tesla_ch2_ultra_fullscreen.pptx", "slide": "13"}, {"term": "hydrocarbon", "meaning": "碳氫化合物", "definition": "(n) a chemical compound made of hydrogen and carbon, often found in fuel. 碳氫化合物 Electric cars reduce dependence on hydrocarbon fuels.", "source": "OneDrive_1_2026-4-28\\tesla_ch2_ultra_fullscreen.pptx", "slide": "14"}, {"term": "affordable", "meaning": "負擔得起的", "definition": "(adj) cheap enough for most people to buy. 負擔得起的 Tesla hopes to produce more affordable family cars.", "source": "OneDrive_1_2026-4-28\\tesla_ch2_ultra_fullscreen.pptx", "slide": "15"}, {"term": "integrate", "meaning": "使融入某社會或群體；使成為一體", "definition": "(v) to mix with and join society or a group of people （使）融入（某社會或群體）；（使）成為一體 He seems to find it difficult to integrate socially.", "source": "OneDrive_1_2026-4-28\\tesla_ch2_ultra_fullscreen.pptx", "slide": "16"}, {"term": "architecture", "meaning": "架構", "definition": "(n) the basic design or structure of a system. 架構 The software architecture controls many functions of the car.", "source": "OneDrive_1_2026-4-28\\tesla_ch2_ultra_fullscreen.pptx", "slide": "17"}, {"term": "indicate", "meaning": "標示；表明；顯示；暗示", "definition": "(v) show, point, or make clear in another way 標示；表明；顯示；暗示 Exploratory investigations have indicated large amounts of oil below the sea bed.", "source": "OneDrive_1_2026-4-28\\tesla_ch2_ultra_fullscreen.pptx", "slide": "18"}, {"term": "software update", "meaning": "軟體更新", "definition": "(n) a new version of software that improves performance or fixes problems. 軟體更新 Drivers can download a software update online.", "source": "OneDrive_1_2026-4-28\\tesla_ch2_ultra_fullscreen.pptx", "slide": "19"}, {"term": "functionality", "meaning": "功能", "definition": "(n) any or all of the operations performed by a piece of equipment or a software program. 功能 The navigation bar provides additional functionality by providing direct links to main sections in the contents including the index.", "source": "OneDrive_1_2026-4-28\\tesla_ch2_ultra_fullscreen.pptx", "slide": "20"}, {"term": "performance", "meaning": "性能；表現", "definition": "(n) how well something works or operates. 性能；表現 The update improved the vehicle's performance.", "source": "OneDrive_1_2026-4-28\\tesla_ch2_ultra_fullscreen.pptx", "slide": "21"}, {"term": "automaker", "meaning": "汽車製造商", "definition": "(n) a big company that makes cars. 汽車製造商 The nation's number three automaker set an all-time monthly sales record in June.", "source": "OneDrive_1_2026-4-28\\tesla_ch2_ultra_fullscreen.pptx", "slide": "22"}, {"term": "consumer", "meaning": "消費者", "definition": "(n) a person who buys goods or services. 消費者 Tesla sells some vehicles directly to consumers.", "source": "OneDrive_1_2026-4-28\\tesla_ch2_ultra_fullscreen.pptx", "slide": "23"}, {"term": "auto", "meaning": "汽車", "definition": "(n) a car 汽車 The town is dominated by its large auto assembly plant.", "source": "OneDrive_1_2026-4-28\\tesla_ch2_ultra_fullscreen.pptx", "slide": "24"}, {"term": "dealership", "meaning": "獲准出售特定產品的經銷公司", "definition": "(n) a business that has permission to sell products from a particular company, especially cars （獲准出售特定產品的）經銷公司 The street was lined with fast food restaurants, car dealerships, and electronics shopsstores.", "source": "OneDrive_1_2026-4-28\\tesla_ch2_ultra_fullscreen.pptx", "slide": "26"}, {"term": "conflict of interest", "meaning": "利益衝突因為相關自身利益而使當事人無法做出公正或公平判斷的情況", "definition": "(n) a situation in which someone cannot make a fair decision because they will be affected by the result 利益衝突（因為相關自身利益而使當事人無法做出公正或公平判斷的情況） I need to declare a conflict of interest here - one of the candidates for the job is a friend of mine.", "source": "OneDrive_1_2026-4-28\\tesla_ch2_ultra_fullscreen.pptx", "slide": "27"}, {"term": "promote", "meaning": "促進;促銷，推銷;推廣", "definition": "(v)to encourage people to like, buy, use, do, or support something 促進;促銷，推銷;推廣 Advertising companies are always having to think up new ways to promote products.", "source": "OneDrive_1_2026-4-28\\tesla_ch2_ultra_fullscreen.pptx", "slide": "28"}, {"term": "proactive", "meaning": "主動的，積極的", "definition": "taking action by causing change and not only reacting to change when it happens 主動的，積極的 Companies are going to have to be more proactive about environmental management.", "source": "OneDrive_1_2026-4-28\\tesla_ch2_ultra_fullscreen.pptx", "slide": "29"}, {"term": "diagnosis", "meaning": "診斷", "definition": "(n) a judgment about what a particular illness or problem is, made after examining it 診斷 The doctor has made an initial diagnosis.", "source": "OneDrive_1_2026-4-28\\tesla_ch2_ultra_fullscreen.pptx", "slide": "30"}, {"term": "remote diagnosis", "meaning": "遠端診斷", "definition": "(n) checking a problem from a distance by using digital technology. 遠端診斷 Remote diagnosis can help engineers detect battery problems early.", "source": "OneDrive_1_2026-4-28\\tesla_ch2_ultra_fullscreen.pptx", "slide": "31"}, {"term": "component", "meaning": "組成部分;成分;零件", "definition": "(n) a part that combines with other parts to form something bigger 組成部分;成分;零件 television/aircraft/computer components", "source": "OneDrive_1_2026-4-28\\tesla_ch2_ultra_fullscreen.pptx", "slide": "32"}, {"term": "proprietary", "meaning": "所有人的，業主的", "definition": "relating to owning something, or relating to or like an owner 所有（人）的，業主的 I just assumed he owned the place - he had a proprietary air about him.", "source": "OneDrive_1_2026-4-28\\tesla_ch2_ultra_fullscreen.pptx", "slide": "33"}, {"term": "automative", "meaning": "自動化的", "definition": "relating to things that have been automated (= made automatic) 自動化的 automative processes", "source": "OneDrive_1_2026-4-28\\tesla_ch2_ultra_fullscreen.pptx", "slide": "34"}, {"term": "outsource", "meaning": "外包，委外;將…委外辦理", "definition": "(n) If a company outsources, it pays to have part of its work done by another company. 外包，委外;（將…）委外辦理 Unions are fighting a plan by the university to outsource all non-academic services.", "source": "OneDrive_1_2026-4-28\\tesla_ch2_ultra_fullscreen.pptx", "slide": "35"}, {"term": "assembly", "meaning": "組合體;組成", "definition": "(n) the structure produced by this process 組合體;組成 The frame needs to be strong enough to support the engine assembly.", "source": "OneDrive_1_2026-4-28\\tesla_ch2_ultra_fullscreen.pptx", "slide": "36"}, {"term": "discreetly", "meaning": "審慎地，謹慎地，小心地", "definition": "(ad) in a way that is careful not to cause embarrassment or attract too much attention, especially by keeping something secret. 審慎地，謹慎地，小心地 The removal of the waste is done discreetly.", "source": "OneDrive_1_2026-4-28\\tesla_ch2_ultra_fullscreen.pptx", "slide": "37"}, {"term": "launch", "meaning": "啓動，推出，發起", "definition": "(v) to begin something such as a plan or introduce something new such as a product. 啓動，推出，發起 The programme was launched a year ago.", "source": "OneDrive_1_2026-4-28\\tesla_ch2_ultra_fullscreen.pptx", "slide": "38"}, {"term": "charge", "meaning": "充電", "definition": "(v) to put electricity into an electrical device such as a battery. 充電 She drove the car round the block to charge (up) its batteries.", "source": "OneDrive_1_2026-4-28\\tesla_ch2_ultra_fullscreen.pptx", "slide": "39"}, {"term": "charger", "meaning": "充電器，充電機", "definition": "(n) a device that is used to recharge a battery. 充電器，充電機 I left my phone charger in the hotel room.", "source": "OneDrive_1_2026-4-28\\tesla_ch2_ultra_fullscreen.pptx", "slide": "40"}, {"term": "free of charge", "meaning": "免費", "definition": "(adj./adv. phr.) costing no money. 免費 Destination chargers are available free of charge at some hotels.", "source": "OneDrive_1_2026-4-28\\tesla_ch2_ultra_fullscreen.pptx", "slide": "41"}, {"term": "on-site", "meaning": "在工地的；在現場的", "definition": "(ad) existing or happening in the place where people are working or involved in a particular activity. 在工地的；在現場的 We're meeting the contractor on-site tomorrow.", "source": "OneDrive_1_2026-4-28\\tesla_ch2_ultra_fullscreen.pptx", "slide": "42"}, {"term": "certified", "meaning": "有合格證書的;獲得資格的", "definition": "having a document that proves that you have successfully finished a course of training. 有合格證書的;獲得資格的 a certified teacher/nurse", "source": "OneDrive_1_2026-4-28\\tesla_ch2_ultra_fullscreen.pptx", "slide": "43"}, {"term": "navigation", "meaning": "領航;導航", "definition": "(n) the act of directing a ship, aircraft, etc. 領航;導航 In the past, navigation depended on a knowledge of the positions of the stars.", "source": "OneDrive_1_2026-4-28\\tesla_ch2_ultra_fullscreen.pptx", "slide": "44"}, {"term": "cell", "meaning": "細胞；電池", "definition": "(n) 細胞 (n) a device for producing electrical energy from chemical energy, 電池", "source": "OneDrive_1_2026-4-28\\tesla_ch2_ultra_fullscreen.pptx", "slide": "45"}, {"term": "cylindrical ( səˈlindrik(ə)l )", "meaning": "圓柱形的；壓縮", "definition": "having the shape of a cylinder (= hollow tube), 圓柱形的 This circumstance makes the solution of the problem of compression (壓縮) stability for a cylindrical target much more complicated.", "source": "OneDrive_1_2026-4-28\\tesla_ch2_ultra_fullscreen.pptx", "slide": "46"}, {"term": "lithium ( ˈliTHēəm )", "meaning": "鋰", "definition": "(n) a chemical element that is a soft, silver-coloured metal, 鋰", "source": "OneDrive_1_2026-4-28\\tesla_ch2_ultra_fullscreen.pptx", "slide": "47"}, {"term": "ion", "meaning": "離子", "definition": "(n) an atom or small group of atoms that has an electrical charge because it has added or lost one or more electrons, 離子", "source": "OneDrive_1_2026-4-28\\tesla_ch2_ultra_fullscreen.pptx", "slide": "48"}, {"term": "commodity", "meaning": "商品，貨物", "definition": "(n) a substance or product that can be traded, bought, or sold 商品，貨物 The country's most valuable commodities include tin and diamonds.", "source": "OneDrive_1_2026-4-28\\tesla_ch2_ultra_fullscreen.pptx", "slide": "49"}, {"term": "feature", "meaning": "特色，特徵，特點", "definition": "(n) a typical quality or an important part of something. 特色，特徵，特點 The town's main features are its beautiful mosque and ancient marketplace.", "source": "OneDrive_1_2026-4-28\\tesla_ch2_ultra_fullscreen.pptx", "slide": "50"}, {"term": "redundant", "meaning": "多餘的，不需要的，累贅的，囉唆的", "definition": "(especially of a word, phrase, etc.) unnecessary because it is more than is needed. 多餘的，不需要的，累贅的，囉唆的 In the sentence \"She is a single unmarried woman\", the word \"unmarried\" is redundant.", "source": "OneDrive_1_2026-4-28\\tesla_ch2_ultra_fullscreen.pptx", "slide": "51"}, {"term": "intumescent (ˌinto͞oˈmes(ə)nt )", "meaning": "膨脹的；鼓起的", "definition": "膨脹的, 鼓起的", "source": "OneDrive_1_2026-4-28\\tesla_ch2_ultra_fullscreen.pptx", "slide": "52"}, {"term": "floor", "meaning": "房間的地板，地面", "definition": "(n) the flat surface of a room on which you walk. （房間的）地板，地面 The floor was partly covered with a dirty old rug.", "source": "OneDrive_1_2026-4-28\\tesla_ch2_ultra_fullscreen.pptx", "slide": "53"}, {"term": "interior", "meaning": "內部", "definition": "(n) the inside part of something, 內部 The estate agent had pictures of the house from the outside but none of its interior.", "source": "OneDrive_1_2026-4-28\\tesla_ch2_ultra_fullscreen.pptx", "slide": "54"}, {"term": "truck", "meaning": "卡車 後車箱", "definition": "(n) 卡車 (n) 後車箱", "source": "OneDrive_1_2026-4-28\\tesla_ch2_ultra_fullscreen.pptx", "slide": "55"}, {"term": "debris", "meaning": "碎片，殘駭", "definition": "(n) broken or torn pieces of something larger, 碎片，殘駭 Debris from the aircraft was scattered over a large area.", "source": "OneDrive_1_2026-4-28\\tesla_ch2_ultra_fullscreen.pptx", "slide": "56"}, {"term": "armor plate", "meaning": "裝甲板", "definition": "(n) a thick metal plate used for protection. 裝甲板 The armor plate helps protect the battery pack under the car.", "source": "OneDrive_1_2026-4-28\\tesla_ch2_ultra_fullscreen.pptx", "slide": "57"}, {"term": "counterpart", "meaning": "作用相同者，相對應者", "definition": "(n) a person or thing that has the same purpose as another one in a different place or organization. 作用相同者，相對應者 The prime minister is to meet his European counterparts to discuss the war against drugs.", "source": "OneDrive_1_2026-4-28\\tesla_ch2_ultra_fullscreen.pptx", "slide": "58"}, {"term": "source", "meaning": "來源；從某地獲取", "definition": "(n) 來源 (v) to get something from a particular place, 從（某地）獲取 Where possible the produce used in our restaurant is sourced locally.", "source": "OneDrive_1_2026-4-28\\tesla_ch2_ultra_fullscreen.pptx", "slide": "59"}, {"term": "in-house", "meaning": "自行設計、生產", "definition": "(ad) Something that is done in-house is done within an organization or business by its employees rather than by other people. 自行(設計、生產) an in-house training scheme", "source": "OneDrive_1_2026-4-28\\tesla_ch2_ultra_fullscreen.pptx", "slide": "60"}, {"term": "mass-produce", "meaning": "大量生產", "definition": "(v) to make large numbers of a product by machine. 大量生產 The company plans to mass-produce batteries at a lower cost.", "source": "OneDrive_1_2026-4-28\\tesla_ch2_ultra_fullscreen.pptx", "slide": "61"}, {"term": "autopilot", "meaning": "自動駕駛輔助系統", "definition": "(n) a system that can automatically control part of a vehicle's movement. 自動駕駛輔助系統 Autopilot can assist drivers on long highway trips.", "source": "OneDrive_1_2026-4-28\\tesla_ch2_ultra_fullscreen.pptx", "slide": "62"}, {"term": "burdensome", "meaning": "麻煩的；沉重的，繁重的", "definition": "causing difficulties or work. 麻煩的；沉重的，繁重的 a burdensome task", "source": "OneDrive_1_2026-4-28\\tesla_ch2_ultra_fullscreen.pptx", "slide": "63"}, {"term": "supervision", "meaning": "監督，管理，指導", "definition": "(n) the act of watching a person or activity and making certain that everything is done correctly, safely, etc. 監督，管理，指導 Students are not allowed to handle these chemicals unless they are under the supervision of a teacher.", "source": "OneDrive_1_2026-4-28\\tesla_ch2_ultra_fullscreen.pptx", "slide": "64"}, {"term": "autonomous", "meaning": "自治的，有自治權的", "definition": "an autonomous machine or system is able to operate without being controlled directly by humans. 自治的，有自治權的 As an autonomous vehicle, it is capable of sensing its environment and navigating without human input.", "source": "OneDrive_1_2026-4-28\\tesla_ch2_ultra_fullscreen.pptx", "slide": "65"}, {"term": "sensor", "meaning": "感測器", "definition": "(n) a device that detects changes such as heat, light, or movement. 感測器 The car uses cameras and sensors to monitor the road.", "source": "OneDrive_1_2026-4-28\\tesla_ch2_ultra_fullscreen.pptx", "slide": "66"}, {"term": "self-driving", "meaning": "自動駕駛的", "definition": "(adj) able to drive itself with little or no human control. 自動駕駛的 Self-driving technology is still developing rapidly.", "source": "OneDrive_1_2026-4-28\\tesla_ch2_ultra_fullscreen.pptx", "slide": "67"}, {"term": "ship", "meaning": "船；運輸，運送", "definition": "(n) 船 (v) to send something, usually a large object or a large quantity of objects or people, to a place far away. 運輸，運送 We ship books out to New York every month.", "source": "OneDrive_1_2026-4-28\\tesla_ch2_ultra_fullscreen.pptx", "slide": "68"}, {"term": "ultrasonic", "meaning": "聲音超聲的", "definition": "Ultrasonic sound is too high for people to hear. （聲音）超聲的 Ultrasonic examinations documented good fetal(胎兒) growth and did not display any abnormalities.", "source": "OneDrive_1_2026-4-28\\tesla_ch2_ultra_fullscreen.pptx", "slide": "69"}, {"term": "beta phase", "meaning": "測試階段；階段", "definition": "(n) a testing stage before a product is fully finished. 測試階段；Beta 階段 The software is still in the beta phase, so drivers must stay alert.", "source": "OneDrive_1_2026-4-28\\tesla_ch2_ultra_fullscreen.pptx", "slide": "71"}, {"term": "tablet", "meaning": "藥片 平板", "definition": "(n) a small, solid piece of medicine. 藥片 (n) 平板 A sleeping tablet. You may take more tablets than prescribed(規定的) on days when you feel more depressed", "source": "OneDrive_1_2026-4-28\\ch3_tablet_paragraphs_v3.pptx", "slide": "3"}, {"term": "primarily", "meaning": "主要地", "definition": "(ad) mainly, 主要地 Baseball is primarily a summer game.", "source": "OneDrive_1_2026-4-28\\ch3_tablet_paragraphs_v3.pptx", "slide": "4"}, {"term": "touchscreen", "meaning": "觸控螢幕", "definition": "(n) a screen that you touch to give instructions to a device. 觸控螢幕 A touchscreen lets users control a tablet with their fingers.", "source": "OneDrive_1_2026-4-28\\ch3_tablet_paragraphs_v3.pptx", "slide": "5"}, {"term": "function", "meaning": "起…作用；當作…使用", "definition": "(v) to work as or serve as something. 起…作用；當作…使用 On a tablet, the screen functions as both a display and an input device.", "source": "OneDrive_1_2026-4-28\\ch3_tablet_paragraphs_v3.pptx", "slide": "6"}, {"term": "device", "meaning": "裝置；設備", "definition": "(n) a machine or tool designed for a special purpose. 裝置；設備 Alan Kay imagined a personal device for children to learn with.", "source": "OneDrive_1_2026-4-28\\ch3_tablet_paragraphs_v3.pptx", "slide": "7"}, {"term": "desktop", "meaning": "桌上型電腦", "definition": "(n) a personal computer designed to stay in one place, usually on a desk. 桌上型電腦 A desktop usually needs a separate monitor and keyboard.", "source": "OneDrive_1_2026-4-28\\ch3_tablet_paragraphs_v3.pptx", "slide": "8"}, {"term": "laptop", "meaning": "筆記型電腦", "definition": "(n) 筆記型電腦 My laptop has a built-in microphone.", "source": "OneDrive_1_2026-4-28\\ch3_tablet_paragraphs_v3.pptx", "slide": "9"}, {"term": "hideable", "meaning": "可隱藏的", "definition": "able to be hidden from view. 可隱藏的 A hideable keyboard can slide behind the screen.", "source": "OneDrive_1_2026-4-28\\ch3_tablet_paragraphs_v3.pptx", "slide": "10"}, {"term": "virtual keyboard", "meaning": "虛擬鍵盤", "definition": "(n) a keyboard shown on a screen instead of a physical one. 虛擬鍵盤 The tablet displays a virtual keyboard when you tap a text box.", "source": "OneDrive_1_2026-4-28\\ch3_tablet_paragraphs_v3.pptx", "slide": "11"}, {"term": "various", "meaning": "各種不同的；各種各樣的", "definition": "many different. 各種不同的；各種各樣的. We had various problems on our journey, including a flat tyre.", "source": "OneDrive_1_2026-4-28\\ch3_tablet_paragraphs_v3.pptx", "slide": "12"}, {"term": "convertible", "meaning": "可改變的，可轉變的", "definition": "able to be arranged in a different way and used for a different purpose. 可改變的，可轉變的 a convertible sofa bed", "source": "OneDrive_1_2026-4-28\\ch3_tablet_paragraphs_v3.pptx", "slide": "13"}, {"term": "swivel", "meaning": "轉動，旋轉", "definition": "(v) to (cause to) turn around a central point in order to face in another direction. 轉動，旋轉 She swivelled round to look out of the window.", "source": "OneDrive_1_2026-4-28\\ch3_tablet_paragraphs_v3.pptx", "slide": "14"}, {"term": "slide joint", "meaning": "滑動接頭；滑軌接頭", "definition": "(n) a connector that allows one part to slide against another. 滑動接頭；滑軌接頭 A slide joint can hide the keyboard behind the screen.", "source": "OneDrive_1_2026-4-28\\ch3_tablet_paragraphs_v3.pptx", "slide": "16"}, {"term": "hybrid", "meaning": "混合體；混合式裝置", "definition": "(n) something that combines two different forms or functions. 混合體；混合式裝置 A hybrid can be used as both a tablet and a laptop.", "source": "OneDrive_1_2026-4-28\\ch3_tablet_paragraphs_v3.pptx", "slide": "17"}, {"term": "detachable", "meaning": "可拆下的；可分離的，可分開的", "definition": "able to be detached. 可拆下的；可分離的，可分開的 a detachable collar/hood", "source": "OneDrive_1_2026-4-28\\ch3_tablet_paragraphs_v3.pptx", "slide": "18"}, {"term": "stand-alone", "meaning": "電腦、企業等獨立的，獨立運作的", "definition": "(a)used to refer to a computer that can operate on its own, without being connected to a network (= a number of computers connected together). （電腦、企業等）獨立的，獨立運作的 At first personal computers were standalone units on employees' desks.", "source": "OneDrive_1_2026-4-28\\ch3_tablet_paragraphs_v3.pptx", "slide": "19"}, {"term": "booklet", "meaning": "書本式雙螢幕平板", "definition": "(n) a tablet design with two touchscreens like an open book. 書本式雙螢幕平板 A booklet may show a keyboard on one screen and text on the other.", "source": "OneDrive_1_2026-4-28\\ch3_tablet_paragraphs_v3.pptx", "slide": "20"}, {"term": "dual", "meaning": "雙重的；雙面的", "definition": "(a) having two parts or two functions. 雙重的；雙面的 The device has dual screens for typing and viewing.", "source": "OneDrive_1_2026-4-28\\ch3_tablet_paragraphs_v3.pptx", "slide": "21"}, {"term": "variety", "meaning": "多樣化；變化", "definition": "(n) the characteristic of often changing and being different. 多樣化；變化 When planning meals, you need to think about variety and taste as well as nutritional value.", "source": "OneDrive_1_2026-4-28\\ch3_tablet_paragraphs_v3.pptx", "slide": "22"}, {"term": "smartphone", "meaning": "智慧型手機", "definition": "(n) a mobile phone that can run apps and connect to the Internet. 智慧型手機 Many people use both a smartphone and a tablet every day.", "source": "OneDrive_1_2026-4-28\\ch3_tablet_paragraphs_v3.pptx", "slide": "23"}, {"term": "differ", "meaning": "與…不同，跟…不一樣，有區別", "definition": "(v) to be not like something or someone else, either physically or in another way. 與…不同，跟…不一樣，有區別 His views differ considerably from those of his parents.", "source": "OneDrive_1_2026-4-28\\ch3_tablet_paragraphs_v3.pptx", "slide": "25"}, {"term": "considerably", "meaning": "相當", "definition": "(ad) to a large, noticeable, or important degree. 相當 He's considerably fatter than he was when I knew him.", "source": "OneDrive_1_2026-4-28\\ch3_tablet_paragraphs_v3.pptx", "slide": "26"}, {"term": "user interface", "meaning": "使用者介面", "definition": "(n) the way a person controls and interacts with a device or program. 使用者介面 A simple user interface makes the tablet easier to use.", "source": "OneDrive_1_2026-4-28\\ch3_tablet_paragraphs_v3.pptx", "slide": "27"}, {"term": "operating system", "meaning": "作業系統", "definition": "(n) the main software that controls a computer or mobile device. 作業系統 Android and iOS are popular operating systems for mobile devices.", "source": "OneDrive_1_2026-4-28\\ch3_tablet_paragraphs_v3.pptx", "slide": "28"}, {"term": "processor", "meaning": "電腦的處理器", "definition": "(n) the part of a computer that processes data and controls operations. （電腦的）處理器 A faster processor helps the tablet run apps smoothly.", "source": "OneDrive_1_2026-4-28\\ch3_tablet_paragraphs_v3.pptx", "slide": "29"}, {"term": "application", "meaning": "應用程式", "definition": "(n) a software program designed for a particular use; an app. 應用程式 Students can download learning applications to their tablets.", "source": "OneDrive_1_2026-4-28\\ch3_tablet_paragraphs_v3.pptx", "slide": "30"}, {"term": "crucial", "meaning": "至關重要的；關鍵的；決定性的", "definition": "extremely important or necessary. 至關重要的；關鍵的；決定性的 Her work has been crucial to the project's success.", "source": "OneDrive_1_2026-4-28\\ch3_tablet_paragraphs_v3.pptx", "slide": "31"}, {"term": "media consumption", "meaning": "媒體內容的觀看與使用", "definition": "(n) the activity of watching, reading, or listening to digital content. 媒體內容的觀看與使用 Tablets are often used for media consumption such as video and news.", "source": "OneDrive_1_2026-4-28\\ch3_tablet_paragraphs_v3.pptx", "slide": "32"}, {"term": "derived from", "meaning": "來自於，源自", "definition": "(phr v) to come from something. 來自於，源自 The English word \"olive\" is derived from the Latin word \"oliva\".", "source": "OneDrive_1_2026-4-28\\ch3_tablet_paragraphs_v3.pptx", "slide": "33"}, {"term": "disruptive", "meaning": "搗亂的，引起混亂的", "definition": "causing trouble and therefore stopping something from continuing as usual. 搗亂的，引起混亂的 His teacher described him as a noisy, disruptive influence in class.", "source": "OneDrive_1_2026-4-28\\ch3_tablet_paragraphs_v3.pptx", "slide": "35"}, {"term": "dramatically", "meaning": "突然地;明顯地", "definition": "(ad) suddenly or obviously. 突然地;明顯地 Your life changes dramatically when you have a baby to take care of.", "source": "OneDrive_1_2026-4-28\\ch3_tablet_paragraphs_v3.pptx", "slide": "36"}, {"term": "cannibalizing", "meaning": "使用同類的；同類相食；拆用；拼修；拼配", "definition": "(v) 使用同類的, 同類相食 (v) to take parts from a machine or vehicle in order to make or repair another machine or vehicle. 拆用；拼修；拼配 He bought an old engine and cannibalized it for spare parts.", "source": "OneDrive_1_2026-4-28\\ch3_tablet_paragraphs_v3.pptx", "slide": "37"}, {"term": "associated", "meaning": "相關的；有關聯的", "definition": "(adj) connected with or related to something else. 相關的；有關聯的 The tablet and its associated software developed together.", "source": "OneDrive_1_2026-4-28\\ch3_tablet_paragraphs_v3.pptx", "slide": "39"}, {"term": "pen computing", "meaning": "手寫筆運算；筆式運算", "definition": "(n) a way of using a computer mainly with a pen or stylus. 手寫筆運算；筆式運算 Early tablet ideas were closely related to pen computing.", "source": "OneDrive_1_2026-4-28\\ch3_tablet_paragraphs_v3.pptx", "slide": "40"}, {"term": "information display", "meaning": "資訊顯示介面", "definition": "(n) a screen or surface used to show data or visual information. 資訊顯示介面 The device used a flat information display to show input and output.", "source": "OneDrive_1_2026-4-28\\ch3_tablet_paragraphs_v3.pptx", "slide": "41"}, {"term": "telautograph", "meaning": "電傳手寫機；電報傳真機", "definition": "(n) an early machine that sent handwriting electrically over a distance. 電傳手寫機；電報傳真機 The telautograph was an early step toward pen-based input.", "source": "OneDrive_1_2026-4-28\\ch3_tablet_paragraphs_v3.pptx", "slide": "42"}, {"term": "contemporary", "meaning": "當代的;現代的", "definition": "existing or happening now, and therefore seeming modern. 當代的;現代的 Although the play was written hundreds of years ago, it still has a contemporary feel to it.", "source": "OneDrive_1_2026-4-28\\ch3_tablet_paragraphs_v3.pptx", "slide": "43"}, {"term": "appear", "meaning": "出現;呈現;顯現", "definition": "(v) to start to be seen or to be present. 出現;呈現;顯現 He suddenly appeared in the doorway.", "source": "OneDrive_1_2026-4-28\\ch3_tablet_paragraphs_v3.pptx", "slide": "44"}, {"term": "science fiction", "meaning": "科幻小說；科幻作品", "definition": "(n) stories about future science, technology, or space travel. 科幻小說；科幻作品 Tablet-like devices appeared in science fiction before they became real.", "source": "OneDrive_1_2026-4-28\\ch3_tablet_paragraphs_v3.pptx", "slide": "45"}, {"term": "alternative", "meaning": "可替代的；可供選擇的 可供選擇的事物；可供選擇的解決辦法", "definition": "(a)可替代的；可供選擇的 (n)可供選擇的事物；可供選擇的解決辦法 You've given me no alternative. I'm afraid we have to let you go.", "source": "OneDrive_1_2026-4-28\\ch3_tablet_paragraphs_v3.pptx", "slide": "46"}, {"term": "coin", "meaning": "硬幣；創造；杜撰新詞", "definition": "(n) 硬幣 (v) to invent a new word or expression. 創造；杜撰（新詞） Alan Kay coined the name “Dynabook.”", "source": "OneDrive_1_2026-4-28\\ch3_tablet_paragraphs_v3.pptx", "slide": "47"}, {"term": "term", "meaning": "把…稱為", "definition": "(v) to call or describe something by a particular name. 把…稱為 Star Trek termed these tablet devices “padds.”", "source": "OneDrive_1_2026-4-28\\ch3_tablet_paragraphs_v3.pptx", "slide": "49"}, {"term": "WebPAD", "meaning": "平板名稱", "definition": "(n) the name of an early touchscreen tablet announced by Intel in 1999. WebPAD 平板名稱 Intel announced a touchscreen tablet called WebPAD in 1999.", "source": "OneDrive_1_2026-4-28\\ch3_tablet_paragraphs_v3.pptx", "slide": "52"}, {"term": "re-branded", "meaning": "給機構，公司，產品等重塑形象", "definition": "(v) to change the way that an organization, company, or product is seen by the public 給（機構，公司，產品等）重塑形象 Businesses may decide to rebrand for several reasons.", "source": "OneDrive_1_2026-4-28\\ch3_tablet_paragraphs_v3.pptx", "slide": "53"}, {"term": "field work", "meaning": "實地考察;野外研究", "definition": "(n) study that consists of practical activities that are done away from your school, college, or place of work 實地考察;野外研究 They had to go to Africa to do their fieldwork.", "source": "OneDrive_1_2026-4-28\\ch3_tablet_paragraphs_v3.pptx", "slide": "54"}, {"term": "usability", "meaning": "可用性", "definition": "(n) the fact of something being easy to use, or the degree to which it is easy to use. 可用性 Candidates must have extensive experience in website design and usability.", "source": "OneDrive_1_2026-4-28\\ch3_tablet_paragraphs_v3.pptx", "slide": "55"}, {"term": "release", "meaning": "發布；推出", "definition": "(v) to make a new product available to the public. 發布；推出 Apple released the iPad in 2010.", "source": "OneDrive_1_2026-4-28\\ch3_tablet_paragraphs_v3.pptx", "slide": "56"}, {"term": "battery life", "meaning": "電池續航力", "definition": "(n) the length of time a device can work before it needs charging. 電池續航力 Long battery life is one reason tablets are convenient.", "source": "OneDrive_1_2026-4-28\\ch3_tablet_paragraphs_v3.pptx", "slide": "57"}, {"term": "simplicity", "meaning": "簡單，簡易", "definition": "(n) the fact that something is easy to understand or do 簡單，簡易 The advantage of the plan is its simplicity.", "source": "OneDrive_1_2026-4-28\\ch3_tablet_paragraphs_v3.pptx", "slide": "58"}, {"term": "with respect to", "meaning": "關於", "definition": "(idiom) in connection with something 關於 I am writing with respect to your letter of 15 June.", "source": "OneDrive_1_2026-4-28\\ch3_tablet_paragraphs_v3.pptx", "slide": "59"}, {"term": "perceive", "meaning": "認為;看待;視為", "definition": "(v) to come to an opinion about something, or have a belief about something 認為;看待;視為 How do the French perceive the British?", "source": "OneDrive_1_2026-4-28\\ch3_tablet_paragraphs_v3.pptx", "slide": "60"}, {"term": "shape", "meaning": "形狀；決定，影響性格", "definition": "(n) 形狀 (v) to decide or influence the form of something, especially a belief or idea, or someone's character 決定，影響（性格） Many people are not able to shape their own destinies.", "source": "OneDrive_1_2026-4-28\\ch3_tablet_paragraphs_v3.pptx", "slide": "61"}, {"term": "iOS", "meaning": "蘋果行動作業系統", "definition": "(n) Apple’s mobile operating system used on devices such as the iPad. 蘋果行動作業系統 iOS The iPad uses iOS to manage apps and settings.", "source": "OneDrive_1_2026-4-28\\ch3_tablet_paragraphs_v3.pptx", "slide": "63"}, {"term": "debut", "meaning": "首演，首次公演", "definition": "(n) the occasion when someone performs or presents something to the public for the first time 首演，首次公演 She made her professional stage debut in Swan Lake.", "source": "OneDrive_1_2026-4-28\\ch3_tablet_paragraphs_v3.pptx", "slide": "64"}, {"term": "popularize", "meaning": "使普及", "definition": "(v) to make something known and understood by ordinary people. 使普及 Television has an important role to play in popularizing new scientific ideas.", "source": "OneDrive_1_2026-4-28\\ch3_tablet_paragraphs_v3.pptx", "slide": "65"}, {"term": "mainstream", "meaning": "主流的", "definition": "considered normal, and having or using ideas, beliefs, etc. that are accepted by most people. 主流的 This is the director's first mainstream Hollywood film.", "source": "OneDrive_1_2026-4-28\\ch3_tablet_paragraphs_v3.pptx", "slide": "66"}, {"term": "multi-touch", "meaning": "多點觸控", "definition": "(n) a touchscreen feature that recognizes more than one touch at the same time. 多點觸控 Multi-touch allows users to zoom in with two fingers.", "source": "OneDrive_1_2026-4-28\\ch3_tablet_paragraphs_v3.pptx", "slide": "67"}, {"term": "solid-state storage drive", "meaning": "固態儲存裝置", "definition": "(n) a storage device with no moving parts that saves data electronically. 固態儲存裝置 A solid-state storage drive can start apps quickly.", "source": "OneDrive_1_2026-4-28\\ch3_tablet_paragraphs_v3.pptx", "slide": "68"}, {"term": "USB", "meaning": "通用序列匯流排", "definition": "(abbr.) Universal Serial Bus; a standard connection for electronic devices. 通用序列匯流排；USB You can connect a keyboard to the tablet through USB.", "source": "OneDrive_1_2026-4-28\\ch3_tablet_paragraphs_v3.pptx", "slide": "69"}, {"term": "Bluetooth", "meaning": "藍牙", "definition": "(n) a wireless technology for connecting nearby devices. 藍牙 Bluetooth lets the tablet connect to wireless headphones.", "source": "OneDrive_1_2026-4-28\\ch3_tablet_paragraphs_v3.pptx", "slide": "70"}, {"term": "telephony", "meaning": "電話通訊", "definition": "(n) the technology of sending sound over a distance by telephone. 電話通訊 Some tablets include mobile telephony capabilities.", "source": "OneDrive_1_2026-4-28\\ch3_tablet_paragraphs_v3.pptx", "slide": "71"}, {"term": "console", "meaning": "控制台；遊戲主機", "definition": "(n.) 控制台；遊戲主機。 補充：本課多指 game console。 例：Many game consoles now use touch menus.", "source": "OneDrive_1_2026-4-28\\ch4_touchscreen_paragraphs_v6_hard70_final.pptx", "slide": "4"}, {"term": "prominent", "meaning": "顯著的；重要的", "definition": "(adj.) 顯著的；重要的。 補充：prominent role 指「扮演重要角色」。 例：Touchscreens play a prominent role in mobile devices.", "source": "OneDrive_1_2026-4-28\\ch4_touchscreen_paragraphs_v6_hard70_final.pptx", "slide": "5"}, {"term": "personal digital assistant", "meaning": "個人數位助理", "definition": "(n.) 個人數位助理。 補充：常見縮寫是 PDA。 例：A personal digital assistant stored notes and schedules.", "source": "OneDrive_1_2026-4-28\\ch4_touchscreen_paragraphs_v6_hard70_final.pptx", "slide": "6"}, {"term": "satellite navigation device", "meaning": "衛星導航裝置", "definition": "(n.) 衛星導航裝置。 補充：常見於車用導航語境。 例：A satellite navigation device helps drivers find routes.", "source": "OneDrive_1_2026-4-28\\ch4_touchscreen_paragraphs_v6_hard70_final.pptx", "slide": "7"}, {"term": "gesture", "meaning": "手勢；觸控手勢", "definition": "(n.) 手勢；觸控手勢。 補充：如 swipe、pinch 等操作。 例：Pinching is a common touchscreen gesture.", "source": "OneDrive_1_2026-4-28\\ch4_touchscreen_paragraphs_v6_hard70_final.pptx", "slide": "8"}, {"term": "stylus", "meaning": "觸控筆；手寫筆", "definition": "(n.) 觸控筆；手寫筆。 補充：比 finger 更適合精細輸入。 例：A stylus helps users write more precisely on a screen.", "source": "OneDrive_1_2026-4-28\\ch4_touchscreen_paragraphs_v6_hard70_final.pptx", "slide": "9"}, {"term": "coated", "meaning": "塗覆的；有塗層的", "definition": "(adj.) 塗覆的；有塗層的。 補充：specially coated gloves 指表面經特殊處理的手套。 例：Coated gloves can sometimes work on a screen.", "source": "OneDrive_1_2026-4-28\\ch4_touchscreen_paragraphs_v6_hard70_final.pptx", "slide": "11"}, {"term": "zoom", "meaning": "放大；縮放", "definition": "(v.) 放大；縮放。 補充：to zoom the text size 指調整文字大小。 例：Users can zoom the text size with two fingers.", "source": "OneDrive_1_2026-4-28\\ch4_touchscreen_paragraphs_v6_hard70_final.pptx", "slide": "12"}, {"term": "information appliance", "meaning": "資訊裝置；資訊家電", "definition": "(n.) 資訊裝置；資訊家電。 補充：指針對特定資訊功能設計的裝置。 例：A kiosk is a type of information appliance.", "source": "OneDrive_1_2026-4-28\\ch4_touchscreen_paragraphs_v6_hard70_final.pptx", "slide": "14"}, {"term": "demand", "meaning": "需求", "definition": "(n.) 需求。 補充：本課常指市場需求，不只是「要求」。 例：Smartphones increased the demand for touchscreens.", "source": "OneDrive_1_2026-4-28\\ch4_touchscreen_paragraphs_v6_hard70_final.pptx", "slide": "15"}, {"term": "acceptance", "meaning": "接受度；採用度", "definition": "(n.) 接受度；採用度。 補充：本課指市場對新技術的接受。 例：Public acceptance of touchscreens has grown quickly.", "source": "OneDrive_1_2026-4-28\\ch4_touchscreen_paragraphs_v6_hard70_final.pptx", "slide": "16"}, {"term": "kiosk", "meaning": "資訊亭；自助機台", "definition": "(n.) 資訊亭；自助機台。 補充：常見於博物館、車站、賣場等場所。 例：The museum installed a touchscreen kiosk at the entrance.", "source": "OneDrive_1_2026-4-28\\ch4_touchscreen_paragraphs_v6_hard70_final.pptx", "slide": "17"}, {"term": "automation", "meaning": "自動化", "definition": "(n.) 自動化。 補充：room automation 指空間設備的自動控制。 例：Touchscreens are often used in room automation.", "source": "OneDrive_1_2026-4-28\\ch4_touchscreen_paragraphs_v6_hard70_final.pptx", "slide": "18"}, {"term": "intuitive", "meaning": "直覺的；容易上手的", "definition": "(adj.) 直覺的；容易上手的。 補充：指不需太多學習就能理解操作。 例：An intuitive interface helps users learn quickly.", "source": "OneDrive_1_2026-4-28\\ch4_touchscreen_paragraphs_v6_hard70_final.pptx", "slide": "19"}, {"term": "interaction", "meaning": "互動；互相作用", "definition": "(n.) 互動；互相作用。 補充：human-computer interaction 常指人機互動。 例：Touchscreens allow faster interaction with content.", "source": "OneDrive_1_2026-4-28\\ch4_touchscreen_paragraphs_v6_hard70_final.pptx", "slide": "20"}, {"term": "accompanying", "meaning": "附隨的；伴隨的", "definition": "(adj.) 附隨的；伴隨的。 補充：accompanying firmware 指配套的韌體。 例：The panel requires accompanying firmware to work well.", "source": "OneDrive_1_2026-4-28\\ch4_touchscreen_paragraphs_v6_hard70_final.pptx", "slide": "23"}, {"term": "firmware", "meaning": "韌體", "definition": "(n.) 韌體。 補充：介於硬體與軟體之間的控制程式。 例：Firmware controls how the touchscreen responds.", "source": "OneDrive_1_2026-4-28\\ch4_touchscreen_paragraphs_v6_hard70_final.pptx", "slide": "24"}, {"term": "array", "meaning": "一系列；大量", "definition": "(n.) 一系列；大量。 補充：a wide array of... 指各式各樣的。 例：The product was supported by a wide array of suppliers.", "source": "OneDrive_1_2026-4-28\\ch4_touchscreen_paragraphs_v6_hard70_final.pptx", "slide": "25"}, {"term": "system integrator", "meaning": "系統整合商", "definition": "(n.) 系統整合商。 補充：負責把不同硬體與軟體整合成系統。 例：System integrators helped bring the technology to market.", "source": "OneDrive_1_2026-4-28\\ch4_touchscreen_paragraphs_v6_hard70_final.pptx", "slide": "26"}, {"term": "motherboard", "meaning": "主機板；母板", "definition": "(n.) 主機板；母板。 補充：電腦內部各元件連接的核心電路板。 例：The controller can be connected to the motherboard.", "source": "OneDrive_1_2026-4-28\\ch4_touchscreen_paragraphs_v6_hard70_final.pptx", "slide": "27"}, {"term": "acknowledge", "meaning": "承認；認知到", "definition": "(v.) 承認；認知到。 補充：此處有「認可、注意到趨勢」之意。 例：Manufacturers acknowledged the value of touchscreens.", "source": "OneDrive_1_2026-4-28\\ch4_touchscreen_paragraphs_v6_hard70_final.pptx", "slide": "28"}, {"term": "desirable", "meaning": "理想的；值得想要的", "definition": "(adj.) 理想的；值得想要的。 補充：常指「很有吸引力、值得採用」。 例：A touchscreen became a desirable interface component.", "source": "OneDrive_1_2026-4-28\\ch4_touchscreen_paragraphs_v6_hard70_final.pptx", "slide": "29"}, {"term": "fundamental", "meaning": "基本的；根本的", "definition": "(adj.) 基本的；根本的。 補充：fundamental design 指核心設計。 例：The change affected the fundamental design of the device.", "source": "OneDrive_1_2026-4-28\\ch4_touchscreen_paragraphs_v6_hard70_final.pptx", "slide": "32"}, {"term": "resistive", "meaning": "電阻式的", "definition": "(adj.) 電阻式的。 補充：依靠壓力與電阻變化來偵測觸碰。 例：A resistive screen responds to pressure.", "source": "OneDrive_1_2026-4-28\\ch4_touchscreen_paragraphs_v6_hard70_final.pptx", "slide": "34"}, {"term": "capacitive", "meaning": "電容式的", "definition": "(adj.) 電容式的。 補充：依靠電荷變化來偵測觸碰。 例：Most smartphones use capacitive touchscreens.", "source": "OneDrive_1_2026-4-28\\ch4_touchscreen_paragraphs_v6_hard70_final.pptx", "slide": "35"}, {"term": "transparent", "meaning": "透明的", "definition": "(adj.) 透明的。 補充：要能讓光線通過並看見下方畫面。 例：The top layer must be transparent.", "source": "OneDrive_1_2026-4-28\\ch4_touchscreen_paragraphs_v6_hard70_final.pptx", "slide": "36"}, {"term": "gap", "meaning": "間隙；空隙", "definition": "(n.) 間隙；空隙。 補充：兩層材料之間保留的小空間。 例：There is a thin gap between the two layers.", "source": "OneDrive_1_2026-4-28\\ch4_touchscreen_paragraphs_v6_hard70_final.pptx", "slide": "37"}, {"term": "comprised", "meaning": "由……組成的", "definition": "(adj./v.pp.) 由……組成的。 補充：be comprised of = be made up of。 例：The panel is comprised of two thin layers.", "source": "OneDrive_1_2026-4-28\\ch4_touchscreen_paragraphs_v6_hard70_final.pptx", "slide": "38"}, {"term": "electrically-resistive", "meaning": "具電阻性的；導電性較差的", "definition": "(adj.) 具電阻性的；導電性較差的。 補充：指材料具有 electrical resistance。 例：The screen uses electrically-resistive layers.", "source": "OneDrive_1_2026-4-28\\ch4_touchscreen_paragraphs_v6_hard70_final.pptx", "slide": "39"}, {"term": "coating", "meaning": "塗層；覆層", "definition": "(n.) 塗層；覆層。 補充：此處指覆在表面的薄層材料。 例：The top screen has a coating on its underside.", "source": "OneDrive_1_2026-4-28\\ch4_touchscreen_paragraphs_v6_hard70_final.pptx", "slide": "40"}, {"term": "substrate", "meaning": "基板；底層", "definition": "(n.) 基板；底層。 補充：用來承載上層材料的基底。 例：A resistive layer sits on top of its substrate.", "source": "OneDrive_1_2026-4-28\\ch4_touchscreen_paragraphs_v6_hard70_final.pptx", "slide": "41"}, {"term": "voltage divider", "meaning": "分壓器", "definition": "(n.) 分壓器。 補充：能把電壓分成較小可測值的電路。 例：The panel behaves like a pair of voltage dividers.", "source": "OneDrive_1_2026-4-28\\ch4_touchscreen_paragraphs_v6_hard70_final.pptx", "slide": "42"}, {"term": "underside", "meaning": "下側；底面", "definition": "(n.) 下側；底面。 補充：underside surface 指物體的下方表面。 例：A coating is applied to the underside surface.", "source": "OneDrive_1_2026-4-28\\ch4_touchscreen_paragraphs_v6_hard70_final.pptx", "slide": "43"}, {"term": "beneath", "meaning": "在……之下", "definition": "(prep./adv.) 在……之下。 補充：比 under 更正式。 例：A similar layer lies just beneath it.", "source": "OneDrive_1_2026-4-28\\ch4_touchscreen_paragraphs_v6_hard70_final.pptx", "slide": "44"}, {"term": "sensed", "meaning": "被感測到的", "definition": "(v./adj.) 被感測到的。 補充：for the touch to be sensed 指讓觸碰被偵測到。 例：The signal is sensed by the other layer.", "source": "OneDrive_1_2026-4-28\\ch4_touchscreen_paragraphs_v6_hard70_final.pptx", "slide": "45"}, {"term": "axis", "meaning": "軸；座標軸", "definition": "(n.) 軸；座標軸。 補充：在觸控定位中常指 x 軸或 y 軸。 例：The panel reads one axis at a time.", "source": "OneDrive_1_2026-4-28\\ch4_touchscreen_paragraphs_v6_hard70_final.pptx", "slide": "46"}, {"term": "switching", "meaning": "切換", "definition": "(n./v.ger.) 切換。 補充：在不同層之間快速交替。 例：Rapid switching helps locate the touch point.", "source": "OneDrive_1_2026-4-28\\ch4_touchscreen_paragraphs_v6_hard70_final.pptx", "slide": "47"}, {"term": "contaminant", "meaning": "污染物；雜質", "definition": "(n.) 污染物；雜質。 補充：像液體、灰塵這類不希望出現的物質。 例：The screen can work even with liquids and contaminants nearby.", "source": "OneDrive_1_2026-4-28\\ch4_touchscreen_paragraphs_v6_hard70_final.pptx", "slide": "48"}, {"term": "sufficient", "meaning": "足夠的", "definition": "(adj.) 足夠的。 補充：only sufficient pressure 表示只要足夠壓力即可。 例：Only sufficient pressure is needed for input.", "source": "OneDrive_1_2026-4-28\\ch4_touchscreen_paragraphs_v6_hard70_final.pptx", "slide": "49"}, {"term": "rigid", "meaning": "堅硬的；不易彎曲的", "definition": "(adj.) 堅硬的；不易彎曲的。 補充：本課指可拿來當替代觸控工具的硬物。 例：Any rigid object can act as a stylus substitute.", "source": "OneDrive_1_2026-4-28\\ch4_touchscreen_paragraphs_v6_hard70_final.pptx", "slide": "50"}, {"term": "substitute", "meaning": "替代物", "definition": "(n.) 替代物。 補充：a finger/stylus substitute 指可替代手指或筆的物件。 例：A plastic tip can be used as a substitute.", "source": "OneDrive_1_2026-4-28\\ch4_touchscreen_paragraphs_v6_hard70_final.pptx", "slide": "51"}, {"term": "reflection", "meaning": "反射；反光", "definition": "(n.) 反射；反光。 補充：螢幕多一層材料時容易產生反光。 例：Extra reflections can make the display harder to read.", "source": "OneDrive_1_2026-4-28\\ch4_touchscreen_paragraphs_v6_hard70_final.pptx", "slide": "52"}, {"term": "insulator", "meaning": "絕緣體", "definition": "(n.) 絕緣體。 補充：不容易讓電流通過的材料。 例：Glass can serve as an insulator in a capacitive panel.", "source": "OneDrive_1_2026-4-28\\ch4_touchscreen_paragraphs_v6_hard70_final.pptx", "slide": "54"}, {"term": "conductor", "meaning": "導體", "definition": "(n.) 導體。 補充：human body is an electrical conductor。 例：A conductor allows electric charge to move.", "source": "OneDrive_1_2026-4-28\\ch4_touchscreen_paragraphs_v6_hard70_final.pptx", "slide": "55"}, {"term": "distortion", "meaning": "扭曲；變形", "definition": "(n.) 扭曲；變形。 補充：此處指電場因觸碰而產生改變。 例：Touching the surface causes a distortion in the field.", "source": "OneDrive_1_2026-4-28\\ch4_touchscreen_paragraphs_v6_hard70_final.pptx", "slide": "56"}, {"term": "electrostatic field", "meaning": "靜電場", "definition": "(n.) 靜電場。 補充：由電荷形成、通常看不見的電場。 例：A finger changes the electrostatic field on the screen.", "source": "OneDrive_1_2026-4-28\\ch4_touchscreen_paragraphs_v6_hard70_final.pptx", "slide": "57"}, {"term": "measurable", "meaning": "可測量的", "definition": "(adj.) 可測量的。 補充：表示變化可以被量到並轉成數值。 例：The change is measurable by the controller.", "source": "OneDrive_1_2026-4-28\\ch4_touchscreen_paragraphs_v6_hard70_final.pptx", "slide": "58"}, {"term": "capacitance", "meaning": "電容", "definition": "(n.) 電容。 補充：指儲存電荷的能力，不是元件名稱。 例：The system measures a change in capacitance.", "source": "OneDrive_1_2026-4-28\\ch4_touchscreen_paragraphs_v6_hard70_final.pptx", "slide": "59"}, {"term": "electrically-insulating", "meaning": "電絕緣的", "definition": "(adj.) 電絕緣的。 補充：指不易讓電流通過。 例：Most gloves are electrically-insulating.", "source": "OneDrive_1_2026-4-28\\ch4_touchscreen_paragraphs_v6_hard70_final.pptx", "slide": "60"}, {"term": "consumer electronics", "meaning": "消費性電子產品", "definition": "(n.) 消費性電子產品。 補充：面向一般消費者的電子設備。 例：Touch tablets are common consumer electronics.", "source": "OneDrive_1_2026-4-28\\ch4_touchscreen_paragraphs_v6_hard70_final.pptx", "slide": "62"}, {"term": "overcome", "meaning": "克服；解決", "definition": "(v.) 克服；解決。 補充：本課指藉由特定工具把問題解決掉。 例：The problem can be overcome with a special stylus.", "source": "OneDrive_1_2026-4-28\\ch4_touchscreen_paragraphs_v6_hard70_final.pptx", "slide": "63"}, {"term": "special-application", "meaning": "特殊用途的", "definition": "(adj.) 特殊用途的。 補充：special-application glove 指專門設計的手套。 例：A special-application glove can improve touch response.", "source": "OneDrive_1_2026-4-28\\ch4_touchscreen_paragraphs_v6_hard70_final.pptx", "slide": "64"}, {"term": "embroidered", "meaning": "刺繡的", "definition": "(adj.) 刺繡的。 補充：embroidered patch 指繡在布料上的區塊。 例：The glove has an embroidered patch on the finger.", "source": "OneDrive_1_2026-4-28\\ch4_touchscreen_paragraphs_v6_hard70_final.pptx", "slide": "65"}, {"term": "conductive", "meaning": "導電的", "definition": "(adj.) 導電的。 補充：conductive 指能導電，不是 conduct 的動詞用法。 例：Conductive thread lets a glove work on a screen.", "source": "OneDrive_1_2026-4-28\\ch4_touchscreen_paragraphs_v6_hard70_final.pptx", "slide": "66"}, {"term": "thread", "meaning": "線；縫線", "definition": "(n.) 線；縫線。 補充：conductive thread 指導電縫線。 例：Fine thread is stitched into the glove.", "source": "OneDrive_1_2026-4-28\\ch4_touchscreen_paragraphs_v6_hard70_final.pptx", "slide": "67"}, {"term": "fingertip", "meaning": "指尖", "definition": "(n.) 指尖。 補充：是手指最前端、最常接觸螢幕的位置。 例：The conductive patch contacts the user's fingertip.", "source": "OneDrive_1_2026-4-28\\ch4_touchscreen_paragraphs_v6_hard70_final.pptx", "slide": "68"}, {"term": "house", "meaning": "容納；裝設", "definition": "(v.) 容納；裝設。 補充：本課是動詞，不是名詞 house。 例：The kiosk houses a computer terminal.", "source": "OneDrive_1_2026-4-28\\ch4_touchscreen_paragraphs_v6_hard70_final.pptx", "slide": "70"}, {"term": "pushbutton", "meaning": "按鈕；按鍵", "definition": "(n.) 按鈕；按鍵。 補充：早期設備常以 pushbuttons 取代觸控。 例：Pushbuttons were common before touch panels spread.", "source": "OneDrive_1_2026-4-28\\ch4_touchscreen_paragraphs_v6_hard70_final.pptx", "slide": "71"}, {"term": "alternatively", "meaning": "或者；換句話說", "definition": "(adv.) 或者；換句話說。 補充：表示另一種說法或另一個選項。 例：The device is alternatively called an interactive kiosk.", "source": "OneDrive_1_2026-4-28\\ch4_touchscreen_paragraphs_v6_hard70_final.pptx", "slide": "72"}, {"term": "employ", "meaning": "使用；採用", "definition": "(v.) 使用；採用。 補充：此處不是「雇用」，而是使用設備或軟體。 例：The terminal employs custom software.", "source": "OneDrive_1_2026-4-28\\ch4_touchscreen_paragraphs_v6_hard70_final.pptx", "slide": "73"}, {"term": "retrieve", "meaning": "取回；擷取", "definition": "(v.) 取回；擷取。 補充：常見於從資料庫或網路取出資料。 例：The kiosk can retrieve data from a network.", "source": "OneDrive_1_2026-4-28\\ch4_touchscreen_paragraphs_v6_hard70_final.pptx", "slide": "74"}, {"term": "informational", "meaning": "提供資訊的", "definition": "(adj.) 提供資訊的。 補充：informational service 指資訊服務。 例：Some kiosks provide informational public services.", "source": "OneDrive_1_2026-4-28\\ch4_touchscreen_paragraphs_v6_hard70_final.pptx", "slide": "75"}, {"term": "commercial", "meaning": "商業的", "definition": "(adj.) 商業的。 補充：與 public 或 educational 用途相對。 例：Other kiosks serve a commercial purpose.", "source": "OneDrive_1_2026-4-28\\ch4_touchscreen_paragraphs_v6_hard70_final.pptx", "slide": "76"}, {"term": "efficiency", "meaning": "效率", "definition": "(n.) 效率。 補充：指在更少時間或成本下完成工作。 例：Touchscreen kiosks improve efficiency and service.", "source": "OneDrive_1_2026-4-28\\ch4_touchscreen_paragraphs_v6_hard70_final.pptx", "slide": "77"}, {"term": "unmanned", "meaning": "無人操作的；無人值守的", "definition": "(adj.) 無人操作的；無人值守的。 補充：常用於 unmanned aircraft / unmanned mission。 例： An unmanned aircraft does not need a pilot on board.", "source": "OneDrive_1_2026-4-28\\ch5_Unmanned_Aerial_Vehicle.pptx", "slide": "3"}, {"term": "aerial", "meaning": "空中的；航空的； 天線", "definition": "(adj.) 空中的；航空的；(n.) 天線。 補充：本課主要用作形容詞，如 aerial vehicle。 例： Aerial vehicles move through the air rather than on the ground.", "source": "OneDrive_1_2026-4-28\\ch5_Unmanned_Aerial_Vehicle.pptx", "slide": "4"}, {"term": "drone", "meaning": "無人機；另可指雄蜂", "definition": "(n.) 無人機；另可指雄蜂。 補充：在科技語境多指 small unmanned aircraft。 例： The drone can film from a high angle.", "source": "OneDrive_1_2026-4-28\\ch5_Unmanned_Aerial_Vehicle.pptx", "slide": "5"}, {"term": "aircraft", "meaning": "航空器；飛行器", "definition": "(n.) 航空器；飛行器。 補充：可統稱 plane, helicopter, UAV 等飛行載具。 例： An aircraft may be piloted by a human or by remote control.", "source": "OneDrive_1_2026-4-28\\ch5_Unmanned_Aerial_Vehicle.pptx", "slide": "6"}, {"term": "pilot", "meaning": "飛行員", "definition": "(n.) 飛行員。 補充：本課也會當動詞，pilot a vehicle = 操控飛行器。 例： The pilot usually sits aboard the aircraft.", "source": "OneDrive_1_2026-4-28\\ch5_Unmanned_Aerial_Vehicle.pptx", "slide": "7"}, {"term": "aboard", "meaning": "在機上；上機", "definition": "(adv./prep.) 在機上；上機。 補充：on board 的較正式說法，常用於飛機、船、火車。 例： No human operator is aboard a typical UAV.", "source": "OneDrive_1_2026-4-28\\ch5_Unmanned_Aerial_Vehicle.pptx", "slide": "8"}, {"term": "powered", "meaning": "由動力驅動的", "definition": "(adj.) 由動力驅動的。 補充：a powered UAV 指有推進動力的無人機。 例： A powered UAV can stay in the air by its own engine or propellers.", "source": "OneDrive_1_2026-4-28\\ch5_Unmanned_Aerial_Vehicle.pptx", "slide": "9"}, {"term": "operator", "meaning": "操作者；控制人員", "definition": "(n.) 操作者；控制人員。 補充：human operator 指遠端控制 UAV 的人。 例： The operator may guide the UAV from the ground.", "source": "OneDrive_1_2026-4-28\\ch5_Unmanned_Aerial_Vehicle.pptx", "slide": "10"}, {"term": "aerodynamic", "meaning": "空氣動力學的", "definition": "(adj.) 空氣動力學的。 補充：aerodynamic forces 指讓飛行器產生升力與控制的力量。 例： Wings are shaped to create aerodynamic lift.", "source": "OneDrive_1_2026-4-28\\ch5_Unmanned_Aerial_Vehicle.pptx", "slide": "11"}, {"term": "lift", "meaning": "升力", "definition": "(n.) 升力。 補充：本課不是「電梯」，而是讓 aircraft 上升的力。 例： Aerodynamic lift keeps the vehicle in the air.", "source": "OneDrive_1_2026-4-28\\ch5_Unmanned_Aerial_Vehicle.pptx", "slide": "12"}, {"term": "autonomously", "meaning": "自主地；自動地", "definition": "(adv.) 自主地；自動地。 補充：autonomously 表示不需持續由人直接控制。 例： Some UAVs can fly autonomously for part of a mission.", "source": "OneDrive_1_2026-4-28\\ch5_Unmanned_Aerial_Vehicle.pptx", "slide": "13"}, {"term": "remotely", "meaning": "遠端地；遙控地", "definition": "(adv.) 遠端地；遙控地。 補充：本課不是「偏遠地」，而是從遠處控制。 例： The aircraft may be remotely guided.", "source": "OneDrive_1_2026-4-28\\ch5_Unmanned_Aerial_Vehicle.pptx", "slide": "15"}, {"term": "expendable", "meaning": "可犧牲的；可拋棄的", "definition": "(adj.) 可犧牲的；可拋棄的。 補充：軍事語境中指任務後不一定要回收。 例： Some early systems were considered expendable.", "source": "OneDrive_1_2026-4-28\\ch5_Unmanned_Aerial_Vehicle.pptx", "slide": "16"}, {"term": "recoverable", "meaning": "可回收的；可重新取回的", "definition": "(adj.) 可回收的；可重新取回的。 補充：與 expendable 相對，強調任務後能回收再用。 例： A recoverable UAV can be brought back safely.", "source": "OneDrive_1_2026-4-28\\ch5_Unmanned_Aerial_Vehicle.pptx", "slide": "17"}, {"term": "lethal", "meaning": "致命的", "definition": "(adj.) 致命的。 補充：lethal / nonlethal payload 指致命／非致命載荷。 例： A lethal payload can seriously injure or kill.", "source": "OneDrive_1_2026-4-28\\ch5_Unmanned_Aerial_Vehicle.pptx", "slide": "18"}, {"term": "payload", "meaning": "有效載荷", "definition": "(n.) 有效載荷。 補充：指 UAV 實際攜帶的相機、感測器或武器等。 例： The payload may be a camera, sensor, or missile.", "source": "OneDrive_1_2026-4-28\\ch5_Unmanned_Aerial_Vehicle.pptx", "slide": "19"}, {"term": "guided", "meaning": "導引的；受導引控制的", "definition": "(adj.) 導引的；受導引控制的。 補充：guided missile 指有導引系統的飛彈。 例： Some weapons are remotely guided after launch.", "source": "OneDrive_1_2026-4-28\\ch5_Unmanned_Aerial_Vehicle.pptx", "slide": "20"}, {"term": "resemblance", "meaning": "相似；外表相似之處", "definition": "(n.) 相似；外表相似之處。 補充：外觀相似、行為相似都可用 resemblance。 例： The drone has a resemblance to a bee.", "source": "OneDrive_1_2026-4-28\\ch5_Unmanned_Aerial_Vehicle.pptx", "slide": "24"}, {"term": "dumb-looking", "meaning": "看起來不聰明的；外表愚鈍的", "definition": "(adj.) 看起來不聰明的；外表愚鈍的。 補充：形容 drone 外觀簡單、似乎很難控制的印象。 例： UAVs had a dumb-looking appearance.", "source": "OneDrive_1_2026-4-28\\ch5_Unmanned_Aerial_Vehicle.pptx", "slide": "25"}, {"term": "loud-and-regular motor sound", "meaning": "刺耳且規律的馬達聲", "definition": "(n.) 刺耳且規律的馬達聲。 補充：指蜜蜂嗡嗡的規律振翅聲。 例： The sound resembled a bee's motor sound.", "source": "OneDrive_1_2026-4-28\\ch5_Unmanned_Aerial_Vehicle.pptx", "slide": "26"}, {"term": "encounter", "meaning": "遇到；碰到", "definition": "(v.) 遇到；碰到。 補充：encounter opposition = 遇到反對。 例： The name encountered opposition from aviation regulators.", "source": "OneDrive_1_2026-4-28\\ch5_Unmanned_Aerial_Vehicle.pptx", "slide": "27"}, {"term": "opposition", "meaning": "反對；對抗", "definition": "(n.) 反對；對抗。 補充：可作名詞或形容詞，表示反對的立場。 例： The aviation community had opposition to the term.", "source": "OneDrive_1_2026-4-28\\ch5_Unmanned_Aerial_Vehicle.pptx", "slide": "28"}, {"term": "regulator", "meaning": "監管機構；調節器", "definition": "(n.) 監管機構；調節器。 補充：aviation regulator = 航空局。 例： Aviation regulators had different opinions.", "source": "OneDrive_1_2026-4-28\\ch5_Unmanned_Aerial_Vehicle.pptx", "slide": "29"}, {"term": "aviation", "meaning": "航空；飛行相關的", "definition": "(n./adj.) 航空；飛行相關的。 補充：aviation industry / aviation safety = 航空產業、航空安全。 例： The aviation industry uses this technology.", "source": "OneDrive_1_2026-4-28\\ch5_Unmanned_Aerial_Vehicle.pptx", "slide": "30"}, {"term": "ground control station", "meaning": "地面控制站", "definition": "(n.) 地面控制站。 補充：UAV 操作人員所在的遠端控制中心。 例： The operator monitors the UAV from a ground control station.", "source": "OneDrive_1_2026-4-28\\ch5_Unmanned_Aerial_Vehicle.pptx", "slide": "31"}, {"term": "data link", "meaning": "數據連結；通訊鏈路", "definition": "(n.) 數據連結；通訊鏈路。 補充：連接地面控制站與 UAV 的無線通訊。 例： A data link transmits signals between operator and UAV.", "source": "OneDrive_1_2026-4-28\\ch5_Unmanned_Aerial_Vehicle.pptx", "slide": "32"}, {"term": "support equipment", "meaning": "支援設備；輔助裝備", "definition": "(n.) 支援設備；輔助裝備。 補充：包括充電、維修等相關設備。 例： Support equipment is needed for operations.", "source": "OneDrive_1_2026-4-28\\ch5_Unmanned_Aerial_Vehicle.pptx", "slide": "33"}, {"term": "UAS", "meaning": "無人機系統", "definition": "(n.) Unmanned Aircraft System 無人機系統。 補充：比 UAV 更廣泛的術語，包含所有相關系統。 例： A UAS includes the aircraft and ground control.", "source": "OneDrive_1_2026-4-28\\ch5_Unmanned_Aerial_Vehicle.pptx", "slide": "34"}, {"term": "miniaturization", "meaning": "微型化；縮小", "definition": "(n.) 微型化；縮小。 補充：miniaturization technology = 使物體變小的技術。 例： Advances in miniaturization enabled smaller UAVs.", "source": "OneDrive_1_2026-4-28\\ch5_Unmanned_Aerial_Vehicle.pptx", "slide": "36"}, {"term": "applicable", "meaning": "可適用的；適用的", "definition": "(adj.) 可適用的；適用的。 補充：applicable to = 適用於。 例： This technology is applicable to many missions.", "source": "OneDrive_1_2026-4-28\\ch5_Unmanned_Aerial_Vehicle.pptx", "slide": "37"}, {"term": "echelon", "meaning": "梯隊；層級", "definition": "(n.) 梯隊；層級。 補充：軍事術語，表示不同層級的部隊編制。 例： UAVs exist at multiple echelons of military operation.", "source": "OneDrive_1_2026-4-28\\ch5_Unmanned_Aerial_Vehicle.pptx", "slide": "38"}, {"term": "pioneer", "meaning": "開創；先驅者", "definition": "(v./n.) 開創；先驅者。 補充：pioneer a technology = 開創一項技術。 例： Military leaders pioneered UAV development.", "source": "OneDrive_1_2026-4-28\\ch5_Unmanned_Aerial_Vehicle.pptx", "slide": "39"}, {"term": "deployable", "meaning": "可部署的；可配置的", "definition": "(adj.) 可部署的；可配置的。 補充：deployable system = 可以部署到戰場的系統。 例： Modern UAVs are highly deployable.", "source": "OneDrive_1_2026-4-28\\ch5_Unmanned_Aerial_Vehicle.pptx", "slide": "40"}, {"term": "aircrew", "meaning": "飛行人員；機組人員", "definition": "(n.) 飛行人員；機組人員。 補充：指駕駛飛機或 UAV 的人員。 例： An aircrew operates the vehicle.", "source": "OneDrive_1_2026-4-28\\ch5_Unmanned_Aerial_Vehicle.pptx", "slide": "41"}, {"term": "surveillance", "meaning": "監視；監督", "definition": "(n.) 監視；監督。 補充：surveillance camera / surveillance mission = 監視攝影機、監視任務。 例： UAVs are used for battlefield surveillance.", "source": "OneDrive_1_2026-4-28\\ch5_Unmanned_Aerial_Vehicle.pptx", "slide": "42"}, {"term": "armament", "meaning": "武裝；武器系統", "definition": "(n.) 武裝；武器系統。 補充：armament system = 武裝系統。 例： Some UAVs carry armament for combat.", "source": "OneDrive_1_2026-4-28\\ch5_Unmanned_Aerial_Vehicle.pptx", "slide": "43"}, {"term": "dull", "meaning": "沉悶的；乏味的", "definition": "(adj.) 沉悶的；乏味的。 補充：任務單調乏味，不危險但重複單調。 例： Surveillance is often a dull task.", "source": "OneDrive_1_2026-4-28\\ch5_Unmanned_Aerial_Vehicle.pptx", "slide": "44"}, {"term": "recreational", "meaning": "娛樂的；消遣的", "definition": "(adj.) 娛樂的；消遣的。 補充：recreational use = 娛樂用途。 例： Hobbyists use drones for recreational flying.", "source": "OneDrive_1_2026-4-28\\ch5_Unmanned_Aerial_Vehicle.pptx", "slide": "45"}, {"term": "policing", "meaning": "警務；執法", "definition": "(n.) 警務；執法。 補充：policing mission = 警務任務。 例： UAVs assist in policing operations.", "source": "OneDrive_1_2026-4-28\\ch5_Unmanned_Aerial_Vehicle.pptx", "slide": "46"}, {"term": "drone racing", "meaning": "無人機競速", "definition": "(n.) 無人機競速。 補充：新興的競技運動，操作無人機進行比賽。 例： Drone racing has become a popular sport.", "source": "OneDrive_1_2026-4-28\\ch5_Unmanned_Aerial_Vehicle.pptx", "slide": "47"}, {"term": "aerial photography", "meaning": "航拍；空中攝影", "definition": "(n.) 航拍；空中攝影。 補充：利用無人機進行的攝影、測量等。 例： Aerial photography is widely used in surveying.", "source": "OneDrive_1_2026-4-28\\ch5_Unmanned_Aerial_Vehicle.pptx", "slide": "48"}, {"term": "autonomy", "meaning": "自主性；自動化程度", "definition": "(n.) 自主性；自動化程度。 補充：degree of autonomy = 自主程度。 例： Modern UAVs have high autonomy.", "source": "OneDrive_1_2026-4-28\\ch5_Unmanned_Aerial_Vehicle.pptx", "slide": "50"}, {"term": "intermittently", "meaning": "間歇地；斷斷續續地", "definition": "(adv.) 間歇地；斷斷續續地。 補充：不連續，有時工作有時不工作。 例： The system operates intermittently during long missions.", "source": "OneDrive_1_2026-4-28\\ch5_Unmanned_Aerial_Vehicle.pptx", "slide": "51"}, {"term": "onboard computer", "meaning": "機載電腦；車載電腦", "definition": "(n.) 機載電腦；車載電腦。 補充：安裝在 UAV 上的控制計算機。 例： The onboard computer controls flight.", "source": "OneDrive_1_2026-4-28\\ch5_Unmanned_Aerial_Vehicle.pptx", "slide": "52"}, {"term": "decoy", "meaning": "誘餌；欺騙性物體", "definition": "(n.) 誘餌；欺騙性物體。 補充：decoy missile = 誘餌飛彈。 例： Some UAVs serve as decoys.", "source": "OneDrive_1_2026-4-28\\ch5_Unmanned_Aerial_Vehicle.pptx", "slide": "53"}, {"term": "gunnery", "meaning": "炮術；射擊", "definition": "(n.) 炮術；射擊。 補充：firing weapons = 發射武器的技術。 例： Gunnery systems require skilled operators.", "source": "OneDrive_1_2026-4-28\\ch5_Unmanned_Aerial_Vehicle.pptx", "slide": "54"}, {"term": "reconnaissance", "meaning": "偵察；探測", "definition": "(n.) 偵察；探測。 補充：reconnaissance mission = 偵察任務。 例： UAVs conduct reconnaissance over large areas.", "source": "OneDrive_1_2026-4-28\\ch5_Unmanned_Aerial_Vehicle.pptx", "slide": "55"}, {"term": "battlefield intelligence", "meaning": "戰場情報", "definition": "(n.) 戰場情報。 補充：在戰場上蒐集的即時情報。 例： Battlefield intelligence is critical for operations.", "source": "OneDrive_1_2026-4-28\\ch5_Unmanned_Aerial_Vehicle.pptx", "slide": "56"}, {"term": "logistics", "meaning": "後勤；物資供應", "definition": "(n.) 後勤；物資供應。 補充：logistics operation = 後勤任務。 例： UAVs help with logistics and supply.", "source": "OneDrive_1_2026-4-28\\ch5_Unmanned_Aerial_Vehicle.pptx", "slide": "57"}, {"term": "cargo", "meaning": "貨物；貨運", "definition": "(n.) 貨物；貨運。 補充：cargo drone = 貨運無人機。 例： Some UAVs are designed to carry cargo.", "source": "OneDrive_1_2026-4-28\\ch5_Unmanned_Aerial_Vehicle.pptx", "slide": "58"}, {"term": "in terms of", "meaning": "就...而言；根據", "definition": "(prep.) 就...而言；根據。 補充：分類或比較的標準。 例： In terms of range, UAVs vary greatly.", "source": "OneDrive_1_2026-4-28\\ch5_Unmanned_Aerial_Vehicle.pptx", "slide": "60"}, {"term": "range", "meaning": "航程；範圍", "definition": "(n.) 航程；範圍。 補充：distance UAV can travel = 無人機能飛行的距離。 例： The range of tactical UAVs is limited.", "source": "OneDrive_1_2026-4-28\\ch5_Unmanned_Aerial_Vehicle.pptx", "slide": "62"}, {"term": "altitude", "meaning": "高度；海拔", "definition": "(n.) 高度；海拔。 補充：flying altitude = 飛行高度。 例： Different UAVs operate at different altitudes.", "source": "OneDrive_1_2026-4-28\\ch5_Unmanned_Aerial_Vehicle.pptx", "slide": "63"}, {"term": "tactical", "meaning": "戰術的；戰場運用的", "definition": "(adj.) 戰術的；戰場運用的。 補充：tactical UAV 通常支援較短程、較具體的作戰任務。 例： A tactical UAV serves battlefield operations.", "source": "OneDrive_1_2026-4-28\\ch5_Unmanned_Aerial_Vehicle.pptx", "slide": "64"}, {"term": "MALE", "meaning": "中空長航時", "definition": "(abbr.) medium altitude, long endurance，中空長航時。 補充：指中高度、可長時間滯空的 UAV 類型。 例： MALE systems can stay aloft for extended missions.", "source": "OneDrive_1_2026-4-28\\ch5_Unmanned_Aerial_Vehicle.pptx", "slide": "65"}, {"term": "HALE", "meaning": "高空長航時", "definition": "(abbr.) high altitude, long endurance，高空長航時。 補充：比 MALE 飛得更高、續航更久。 例： HALE platforms are used for very wide-area missions.", "source": "OneDrive_1_2026-4-28\\ch5_Unmanned_Aerial_Vehicle.pptx", "slide": "66"}, {"term": "Mach", "meaning": "馬赫，音速倍數單位", "definition": "(n.) 馬赫，音速倍數單位。 補充：Mach 5 = 五倍音速；不是 machine 的縮寫。 例： Hypersonic flight begins above Mach 5.", "source": "OneDrive_1_2026-4-28\\ch5_Unmanned_Aerial_Vehicle.pptx", "slide": "67"}, {"term": "hypersonic", "meaning": "極超音速的", "definition": "(adj.) 極超音速的。 補充：一般指超過 Mach 5 的飛行速度。 例： Hypersonic vehicles move far faster than sound.", "source": "OneDrive_1_2026-4-28\\ch5_Unmanned_Aerial_Vehicle.pptx", "slide": "68"}, {"term": "suborbital", "meaning": "次軌道的", "definition": "(adj.) 次軌道的。 補充：飛行高度很高，但仍未形成完整環繞地球的軌道。 例： A suborbital path does not complete an orbit.", "source": "OneDrive_1_2026-4-28\\ch5_Unmanned_Aerial_Vehicle.pptx", "slide": "69"}, {"term": "low earth orbit", "meaning": "低地球軌道", "definition": "(n.) 低地球軌道。 補充：常縮寫 LEO，指較接近地球的軌道範圍。 例： Some classifications extend up to low earth orbit.", "source": "OneDrive_1_2026-4-28\\ch5_Unmanned_Aerial_Vehicle.pptx", "slide": "70"}, {"term": "hobbyist", "meaning": "業餘愛好者", "definition": "(n.) 業餘愛好者。 補充：hobbyist UAVs 指玩家型、非專業用途的無人機。 例： A hobbyist may buy a small ready-to-fly drone.", "source": "OneDrive_1_2026-4-28\\ch5_Unmanned_Aerial_Vehicle.pptx", "slide": "72"}, {"term": "RTF", "meaning": "開箱即飛", "definition": "(abbr.) ready-to-fly，開箱即飛。 補充：指到手即可飛，無需組裝。 例： Many hobby drones are sold as RTF products.", "source": "OneDrive_1_2026-4-28\\ch5_Unmanned_Aerial_Vehicle.pptx", "slide": "73"}, {"term": "COTS", "meaning": "商用現成品", "definition": "(abbr.) commercial-off-the-shelf，商用現成品。 補充：直接購買現成標準零件組裝。 例： COTS components reduce development cost.", "source": "OneDrive_1_2026-4-28\\ch5_Unmanned_Aerial_Vehicle.pptx", "slide": "74"}, {"term": "BNF", "meaning": "綁定後即可飛", "definition": "(abbr.) bind-and-fly，綁定後即可飛。 補充：玩家只要把遙控器與機體綁定，就能開始操作。 例： A BNF drone needs only a compatible controller.", "source": "OneDrive_1_2026-4-28\\ch5_Unmanned_Aerial_Vehicle.pptx", "slide": "75"}, {"term": "stealth", "meaning": "匿蹤的；匿蹤能力", "definition": "(adj./n.) 匿蹤的；匿蹤能力。 補充：stealth combat drones 強調不易被偵測。 例： Stealth designs reduce the chance of being detected.", "source": "OneDrive_1_2026-4-28\\ch5_Unmanned_Aerial_Vehicle.pptx", "slide": "76"}, {"term": "micro air vehicle", "meaning": "微型飛行器", "definition": "(n.) 微型飛行器。 補充：常縮寫 MAV，通常極輕、體積極小。 例： A micro air vehicle can weigh less than one gram.", "source": "OneDrive_1_2026-4-28\\ch5_Unmanned_Aerial_Vehicle.pptx", "slide": "78"}, {"term": "small tactical", "meaning": "小型戰術級", "definition": "(adj./n.) 小型戰術級。 補充：輕量級戰術用無人機，重量較輕。 例： Small tactical UAVs are portable and deployable.", "source": "OneDrive_1_2026-4-28\\ch5_Unmanned_Aerial_Vehicle.pptx", "slide": "79"}, {"term": "medium tactical", "meaning": "中型戰術級", "definition": "(adj./n.) 中型戰術級。 補充：中等大小的戰術用無人機。 例： Medium tactical UAVs carry more payload.", "source": "OneDrive_1_2026-4-28\\ch5_Unmanned_Aerial_Vehicle.pptx", "slide": "80"}, {"term": "strategic", "meaning": "戰略的；策略的", "definition": "(adj.) 戰略的；策略的。 補充：strategic UAV = 戰略級無人機，大型、長航時。 例： Strategic UAVs operate over wide areas.", "source": "OneDrive_1_2026-4-28\\ch5_Unmanned_Aerial_Vehicle.pptx", "slide": "81"}, {"term": "operate / operator / operation", "meaning": "操作者；操作;運作", "definition": "operate (v.) → operator (n.) 操作者 → operation (n.) 操作;運作 例： The operator conducts the operation to control the aircraft.", "source": "OneDrive_1_2026-4-28\\ch5_Unmanned_Aerial_Vehicle.pptx", "slide": "83"}, {"term": "fly / flight / pilot", "meaning": "飛行；飛行員; 駕駛", "definition": "fly (v.) → flight (n.) 飛行 → pilot (n.) 飛行員;(v.) 駕駛 例： The pilot commands the aircraft during flight.", "source": "OneDrive_1_2026-4-28\\ch5_Unmanned_Aerial_Vehicle.pptx", "slide": "84"}, {"term": "arm / armed / armament", "meaning": "武裝；武裝的；武器系統", "definition": "arm (v.) 武裝 → armed (adj.) 武裝的 → armament (n.) 武器系統 例： Armed UAVs carry armament for combat missions.", "source": "OneDrive_1_2026-4-28\\ch5_Unmanned_Aerial_Vehicle.pptx", "slide": "85"}, {"term": "apply / applicable / application", "meaning": "應用；可適用的；應用;申請", "definition": "apply (v.) 應用 → applicable (adj.) 可適用的 → application (n.) 應用;申請 例： This technology has many applications in applicable fields.", "source": "OneDrive_1_2026-4-28\\ch5_Unmanned_Aerial_Vehicle.pptx", "slide": "86"}, {"term": "automate / autonomy / autonomous", "meaning": "自動化；自主性；自主的", "definition": "automate (v.) 自動化 → autonomy (n.) 自主性 → autonomous (adj.) 自主的 例： Autonomous systems increase operational autonomy.", "source": "OneDrive_1_2026-4-28\\ch5_Unmanned_Aerial_Vehicle.pptx", "slide": "87"}, {"term": "deploy / deployable / deployment", "meaning": "部署；可部署的；部署", "definition": "deploy (v.) 部署 → deployable (adj.) 可部署的 → deployment (n.) 部署 例： Deployable systems are ready for rapid deployment.", "source": "OneDrive_1_2026-4-28\\ch5_Unmanned_Aerial_Vehicle.pptx", "slide": "88"}, {"term": "conduct / conductor / conduction", "meaning": "執行;傳導；導體;指揮者；導電", "definition": "conduct (v.) 執行;傳導 → conductor (n.) 導體;指揮者 → conduction (n.) 導電 例： Ground crews conduct the mission via conduction of signals.", "source": "OneDrive_1_2026-4-28\\ch5_Unmanned_Aerial_Vehicle.pptx", "slide": "89"}, {"term": "survey / surveillance", "meaning": "調查;測量；監視;偵察", "definition": "survey (v./n.) 調查;測量 → surveillance (n.) 監視;偵察 例： Aerial surveys provide surveillance data.", "source": "OneDrive_1_2026-4-28\\ch5_Unmanned_Aerial_Vehicle.pptx", "slide": "90"}, {"term": "gyroscope", "meaning": "陀螺儀；迴轉儀", "definition": "(n.) 陀螺儀；迴轉儀。 補充：利用角動量原理來偵測或維持方向的裝置；課文編號 1。 例： Accelerometers and gyroscopes are devices widely used in contemporary portable electronic devices.", "source": "OneDrive_1_2026-4-28\\ch6_Accelerometer_&_Gyroscope_with_replaced_images.pptx", "slide": "3"}, {"term": "accelerometer", "meaning": "加速規；加速度計", "definition": "(n.) 加速規；加速度計。 補充：accelerate (v.)、acceleration (n.)；課文編號 2。 例： An accelerometer is a device that measures the acceleration of an object.", "source": "OneDrive_1_2026-4-28\\ch6_Accelerometer_&_Gyroscope_with_replaced_images.pptx", "slide": "4"}, {"term": "measure", "meaning": "測量 ；措施、方法", "definition": "(v. / n.) 測量 (v.)；措施、方法 (n.)。 補充：measurement (n.) 測量值；本段出現的 measures 為第三人稱單數動詞。 例： An accelerometer is a device that measures the acceleration of an object.", "source": "OneDrive_1_2026-4-28\\ch6_Accelerometer_&_Gyroscope_with_replaced_images.pptx", "slide": "6"}, {"term": "acceleration", "meaning": "加速度", "definition": "(n.) 加速度。 補充：物體速度改變的快慢；單位 m/s²。 例： Acceleration is quantified in the unit meters per second per second (m/s²).", "source": "OneDrive_1_2026-4-28\\ch6_Accelerometer_&_Gyroscope_with_replaced_images.pptx", "slide": "7"}, {"term": "quantified", "meaning": "被量化；以數值表示", "definition": "(v., p.p.) 被量化；以數值表示。 補充：quantify (v.) 量化；quantity (n.) 數量。 例： Acceleration is quantified in the unit meters per second per second (m/s²).", "source": "OneDrive_1_2026-4-28\\ch6_Accelerometer_&_Gyroscope_with_replaced_images.pptx", "slide": "8"}, {"term": "g-force", "meaning": "力；重力加速度", "definition": "(n.) G 力；重力加速度。 補充：1 g ≈ 9.8 m/s²，常作為加速度的通俗單位。 例： Acceleration is popularly measured in terms of g-force (g).", "source": "OneDrive_1_2026-4-28\\ch6_Accelerometer_&_Gyroscope_with_replaced_images.pptx", "slide": "9"}, {"term": "sensitive", "meaning": "敏感的；靈敏的", "definition": "(adj.) 敏感的；靈敏的。 補充：sensitivity (n.) 靈敏度；sense (v./n.) 感知。 例： Highly sensitive accelerometers are components of inertial navigation systems.", "source": "OneDrive_1_2026-4-28\\ch6_Accelerometer_&_Gyroscope_with_replaced_images.pptx", "slide": "10"}, {"term": "inertial", "meaning": "慣性的", "definition": "(adj.) 慣性的。 補充：inertia (n.) 慣性；inertial navigation system (INS) = 慣性導航系統；課文編號 3。 例： Accelerometers are components of inertial navigation systems for aircraft and missiles.", "source": "OneDrive_1_2026-4-28\\ch6_Accelerometer_&_Gyroscope_with_replaced_images.pptx", "slide": "12"}, {"term": "magnitude", "meaning": "大小；強度；量值", "definition": "(n.) 大小；強度；量值。 補充：magnitude 相對於 direction — 物理量的「大小」與「方向」。 例： Accelerometers detect magnitude and direction of acceleration.", "source": "OneDrive_1_2026-4-28\\ch6_Accelerometer_&_Gyroscope_with_replaced_images.pptx", "slide": "15"}, {"term": "sense", "meaning": "感知；感應 ；感覺、知覺", "definition": "(v. / n.) 感知；感應 (v.)；感覺、知覺 (n.)。 補充：sensor (n.) 感測器；sensitive (adj.) 敏感的。 例： Accelerometers can sense orientation, coordinate acceleration, vibration and shock.", "source": "OneDrive_1_2026-4-28\\ch6_Accelerometer_&_Gyroscope_with_replaced_images.pptx", "slide": "16"}, {"term": "orientation", "meaning": "方位；方向；定位", "definition": "(n.) 方位；方向；定位。 補充：orient (v.) 使朝向；課文編號 5。 例： The screen adjusts based on the orientation of the device.", "source": "OneDrive_1_2026-4-28\\ch6_Accelerometer_&_Gyroscope_with_replaced_images.pptx", "slide": "17"}, {"term": "coordinate", "meaning": "座標；座標值", "definition": "(n.) 座標；座標值。 補充：coordinate system = 座標系統；課文編號 6。 例： Accelerometers sense coordinate acceleration in 3D space.", "source": "OneDrive_1_2026-4-28\\ch6_Accelerometer_&_Gyroscope_with_replaced_images.pptx", "slide": "18"}, {"term": "vibration", "meaning": "震動；振動", "definition": "(n.) 震動；振動。 補充：vibrate (v.) 震動；手機的震動模式即利用此原理。 例： Electronic devices use accelerometers to detect vibration and shock.", "source": "OneDrive_1_2026-4-28\\ch6_Accelerometer_&_Gyroscope_with_replaced_images.pptx", "slide": "19"}, {"term": "shock", "meaning": "衝擊；撞擊", "definition": "(n.) 衝擊；撞擊。 補充：本課指物理性的突然撞擊，不是「電擊」或「驚嚇」。 例： A free-fall sensor detects shock when the device is falling.", "source": "OneDrive_1_2026-4-28\\ch6_Accelerometer_&_Gyroscope_with_replaced_images.pptx", "slide": "20"}, {"term": "align", "meaning": "使對齊；使校直；使一致", "definition": "(v.) 使對齊；使校直；使一致。 補充：alignment (n.) 對齊；本課指螢幕方向的對齊。 例： Electronic devices use accelerometers to align the screen depending on the direction the device is held.", "source": "OneDrive_1_2026-4-28\\ch6_Accelerometer_&_Gyroscope_with_replaced_images.pptx", "slide": "21"}, {"term": "portrait", "meaning": "肖像畫", "definition": "(n.) 肖像畫 (n.)；portrait mode = 直式模式。 補充：肖像畫多為直式構圖，故以其命名直式螢幕模式；課文編號 7。 例： The screen switches between portrait and landscape modes.", "source": "OneDrive_1_2026-4-28\\ch6_Accelerometer_&_Gyroscope_with_replaced_images.pptx", "slide": "22"}, {"term": "landscape", "meaning": "山水畫、風景畫；風景", "definition": "(n.) 山水畫、風景畫；風景 (n.)；landscape mode = 橫式模式。 補充：風景畫多為橫式構圖；課文編號 8。 例： The screen switches between portrait and landscape modes.", "source": "OneDrive_1_2026-4-28\\ch6_Accelerometer_&_Gyroscope_with_replaced_images.pptx", "slide": "23"}, {"term": "micromachined", "meaning": "精密加工的；以微機械製程製作的", "definition": "(adj.) 精密加工的；以微機械製程製作的。 補充：micro + machine，常用於 MEMS 感測器；課文編號 9。 例： Micromachined accelerometers are increasingly present in video game controllers.", "source": "OneDrive_1_2026-4-28\\ch6_Accelerometer_&_Gyroscope_with_replaced_images.pptx", "slide": "24"}, {"term": "free-fall", "meaning": "自由落體的", "definition": "(n. / adj.) 自由落體（的）。 補充：指物體僅受重力作用而下落的狀態；free-fall sensor = 自由落體感測器。 例： A free-fall sensor is an accelerometer used to detect if a system has been dropped and is falling.", "source": "OneDrive_1_2026-4-28\\ch6_Accelerometer_&_Gyroscope_with_replaced_images.pptx", "slide": "26"}, {"term": "safety measures", "meaning": "安全措施", "definition": "(n., pl.) 安全措施。 補充：此處的 measures 意為「措施」而非「測量」。 例： It provides safety measures such as parking the head of a hard disk to prevent a head crash.", "source": "OneDrive_1_2026-4-28\\ch6_Accelerometer_&_Gyroscope_with_replaced_images.pptx", "slide": "27"}, {"term": "hard disk", "meaning": "硬碟", "definition": "(n.) 硬碟。 補充：電腦中以磁性媒介儲存資料的主要裝置；跌落時讀寫頭易損壞。 例： The accelerometer parks the head of a hard disk to prevent a head crash upon impact.", "source": "OneDrive_1_2026-4-28\\ch6_Accelerometer_&_Gyroscope_with_replaced_images.pptx", "slide": "28"}, {"term": "upon", "meaning": "在…之上；一…就", "definition": "(prep.) 在…之上；一…就。 補充：upon impact = 一受到衝擊；upon = on 的較正式用法。 例： The device parks the hard disk head upon impact.", "source": "OneDrive_1_2026-4-28\\ch6_Accelerometer_&_Gyroscope_with_replaced_images.pptx", "slide": "29"}, {"term": "impact", "meaning": "衝擊；碰撞", "definition": "(n.) 衝擊；碰撞。 補充：impact = shock 的同義語；課文編號 10。 例： The accelerometer parks the hard disk head upon impact.", "source": "OneDrive_1_2026-4-28\\ch6_Accelerometer_&_Gyroscope_with_replaced_images.pptx", "slide": "30"}, {"term": "data logger", "meaning": "數據紀錄儀", "definition": "(n.) 數據紀錄儀。 補充：Terminology a；用來記錄感測數據（溫度、加速度等）的裝置。 例： Data loggers monitor handling operations for shipping containers.", "source": "OneDrive_1_2026-4-28\\ch6_Accelerometer_&_Gyroscope_with_replaced_images.pptx", "slide": "31"}, {"term": "monitor", "meaning": "監控、監測 ；監視器", "definition": "(v. / n.) 監控、監測 (v.)；監視器 (n.)。 補充：本課用作動詞，指持續觀察與追蹤。 例： Data loggers monitor handling operations for shipping containers.", "source": "OneDrive_1_2026-4-28\\ch6_Accelerometer_&_Gyroscope_with_replaced_images.pptx", "slide": "32"}, {"term": "handling", "meaning": "搬運；操作；處理", "definition": "(n.) 搬運；操作；處理。 補充：handle (v.) 處理、搬運；handling operations = 搬運作業。 例： The sensor is used to monitor handling operations for shipping.", "source": "OneDrive_1_2026-4-28\\ch6_Accelerometer_&_Gyroscope_with_replaced_images.pptx", "slide": "33"}, {"term": "calculate", "meaning": "計算", "definition": "(v.) 計算。 補充：calculation (n.) 計算；本課指計算跌落高度。 例： The length of time in free fall is used to calculate the height of drop.", "source": "OneDrive_1_2026-4-28\\ch6_Accelerometer_&_Gyroscope_with_replaced_images.pptx", "slide": "34"}, {"term": "estimate", "meaning": "估計；估算；預估", "definition": "(v. / n.) 估計；估算；預估。 補充：estimated (adj.) 預估的；estimation (n.)；p. 73 Families of Vocabulary。 例： Accelerometers are used to estimate the shock to the package.", "source": "OneDrive_1_2026-4-28\\ch6_Accelerometer_&_Gyroscope_with_replaced_images.pptx", "slide": "35"}, {"term": "mechanical", "meaning": "機械的；機械式的", "definition": "(adj.) 機械的；機械式的。 補充：mechanic (n.) 技工；mechanism (n.) 機制。 例： A gyroscope is a mechanical device comprised of a rotor and gimbals.", "source": "OneDrive_1_2026-4-28\\ch6_Accelerometer_&_Gyroscope_with_replaced_images.pptx", "slide": "38"}, {"term": "comprised of", "meaning": "由……組成", "definition": "(phr.) 由……組成。 補充：be comprised of = consist of = be made up of。 例： A gyroscope is comprised of a rotor and two or more gimbals.", "source": "OneDrive_1_2026-4-28\\ch6_Accelerometer_&_Gyroscope_with_replaced_images.pptx", "slide": "39"}, {"term": "rotor", "meaning": "轉子；旋轉的構件", "definition": "(n.) 轉子；旋轉的構件。 補充：陀螺儀內部高速旋轉的核心部件；課文編號 11。 例： The rotor is installed to spin about one axis.", "source": "OneDrive_1_2026-4-28\\ch6_Accelerometer_&_Gyroscope_with_replaced_images.pptx", "slide": "40"}, {"term": "gimbal", "meaning": "平衡環；萬向節；使羅盤針平衡之環", "definition": "(n.) 平衡環；萬向節；使羅盤針平衡之環。 補充：允許物體在多個軸上自由旋轉的機械結構；課文編號 12。 例： A gyroscope is comprised of a rotor and two or more gimbals.", "source": "OneDrive_1_2026-4-28\\ch6_Accelerometer_&_Gyroscope_with_replaced_images.pptx", "slide": "41"}, {"term": "mounted", "meaning": "被安裝；被固定於", "definition": "(v., p.p.) 被安裝；被固定於。 補充：mount (v.) 安裝、架設；be mounted on = 被裝設在……上。 例： The axis is mounted on an inner gimbal.", "source": "OneDrive_1_2026-4-28\\ch6_Accelerometer_&_Gyroscope_with_replaced_images.pptx", "slide": "42"}, {"term": "inner", "meaning": "內部的；裡面的", "definition": "(adj.) 內部的；裡面的。 補充：inner gimbal = 內平衡環；反義 outer。 例： The inner gimbal is spinning about another axis.", "source": "OneDrive_1_2026-4-28\\ch6_Accelerometer_&_Gyroscope_with_replaced_images.pptx", "slide": "43"}, {"term": "spinning", "meaning": "旋轉中的；自轉的", "definition": "(v., -ing) 旋轉中的；自轉的。 補充：spin (v.) 的現在分詞；過去式 spun。 例： The inner gimbal is spinning about another axis.", "source": "OneDrive_1_2026-4-28\\ch6_Accelerometer_&_Gyroscope_with_replaced_images.pptx", "slide": "44"}, {"term": "outer", "meaning": "外部的；外面的", "definition": "(adj.) 外部的；外面的。 補充：outer gimbal = 外平衡環；反義 inner。 例： The outer gimbal or the gyroscope frame is mounted so as to pivot about an axis.", "source": "OneDrive_1_2026-4-28\\ch6_Accelerometer_&_Gyroscope_with_replaced_images.pptx", "slide": "45"}, {"term": "frame", "meaning": "框架；骨架；外殼結構", "definition": "(n.) 框架；骨架；外殼結構。 補充：gyroscope frame = 陀螺儀的外部支撐結構。 例： The outer gimbal or the gyroscope frame is mounted so as to pivot.", "source": "OneDrive_1_2026-4-28\\ch6_Accelerometer_&_Gyroscope_with_replaced_images.pptx", "slide": "46"}, {"term": "pivot", "meaning": "繞樞軸旋轉 ；樞軸、支點", "definition": "(v. / n.) 繞樞軸旋轉 (v.)；樞軸、支點 (n.)。 補充：to pivot about an axis = 繞某一軸旋轉。 例： The gyroscope frame is mounted so as to pivot about an axis.", "source": "OneDrive_1_2026-4-28\\ch6_Accelerometer_&_Gyroscope_with_replaced_images.pptx", "slide": "47"}, {"term": "support", "meaning": "支撐結構 ；支撐、支持", "definition": "(n. / v.) 支撐結構 (n.)；支撐、支持 (v.)。 補充：本課指物理上的支撐結構。 例： The axis is in its own plane determined by the support.", "source": "OneDrive_1_2026-4-28\\ch6_Accelerometer_&_Gyroscope_with_replaced_images.pptx", "slide": "48"}, {"term": "simultaneously", "meaning": "同時地", "definition": "(adv.) 同時地。 補充：simultaneous (adj.) 同時的；simul- 字根「同時」。 例： The rotor simultaneously spins about one axis and is capable of oscillating about the two other axes.", "source": "OneDrive_1_2026-4-28\\ch6_Accelerometer_&_Gyroscope_with_replaced_images.pptx", "slide": "49"}, {"term": "oscillating", "meaning": "擺動的；振盪的", "definition": "(v., -ing) 擺動的；振盪的。 補充：oscillate (v.) 擺動、振盪；oscillation (n.) 振盪。 例： The rotor is capable of oscillating about the two other axes.", "source": "OneDrive_1_2026-4-28\\ch6_Accelerometer_&_Gyroscope_with_replaced_images.pptx", "slide": "50"}, {"term": "advent", "meaning": "出現；來臨；問世", "definition": "(n.) 出現；來臨；問世。 補充：the advent of X = X 的出現；常搭配 with。 例： The advent of electric motors made it possible for developing gyrocompasses.", "source": "OneDrive_1_2026-4-28\\ch6_Accelerometer_&_Gyroscope_with_replaced_images.pptx", "slide": "52"}, {"term": "functional", "meaning": "功能的；可運作的；實用的", "definition": "(adj.) 功能的；可運作的；實用的。 補充：function (n.) 功能；functionality (n.) 功能性。 例： The first functional gyrocompass was patented in 1904.", "source": "OneDrive_1_2026-4-28\\ch6_Accelerometer_&_Gyroscope_with_replaced_images.pptx", "slide": "53"}, {"term": "gyrocompass", "meaning": "陀螺儀羅盤", "definition": "(n.) 陀螺儀羅盤。 補充：利用陀螺儀原理指北，不受磁場影響；課文編號 13。 例： Electric motors made it possible for developing gyrocompasses.", "source": "OneDrive_1_2026-4-28\\ch6_Accelerometer_&_Gyroscope_with_replaced_images.pptx", "slide": "54"}, {"term": "patent", "meaning": "專利、專利權 ；取得專利權 ；有專利的", "definition": "(n. / v. / adj.) 專利、專利權 (n.)；取得專利權 (v.)；有專利的 (adj.)。 補充：patent pending = 專利審查中；課文編號 14。 例： The first functional gyrocompass was patented in 1904.", "source": "OneDrive_1_2026-4-28\\ch6_Accelerometer_&_Gyroscope_with_replaced_images.pptx", "slide": "55"}, {"term": "basis", "meaning": "基礎；基準 複數", "definition": "(n.) 基礎；基準 (複數 bases)。 補充：on the basis of = 根據；as the basis for = 作為…的基礎。 例： Inventors used gyroscopes as the basis for early navigational systems.", "source": "OneDrive_1_2026-4-28\\ch6_Accelerometer_&_Gyroscope_with_replaced_images.pptx", "slide": "57"}, {"term": "navigational systems", "meaning": "導航系統", "definition": "(n., pl.) 導航系統。 補充：navigate (v.) 導航；navigational (adj.) 導航的。 例： Inventors used gyroscopes as the basis for early navigational systems.", "source": "OneDrive_1_2026-4-28\\ch6_Accelerometer_&_Gyroscope_with_replaced_images.pptx", "slide": "58"}, {"term": "principles", "meaning": "原理；原則", "definition": "(n., pl.) 原理；原則。 補充：principle 勿與 principal (校長；主要的) 混淆。 例： Similar principles were later employed in the development of inertial guidance systems.", "source": "OneDrive_1_2026-4-28\\ch6_Accelerometer_&_Gyroscope_with_replaced_images.pptx", "slide": "59"}, {"term": "guidance", "meaning": "制導；導引；指引", "definition": "(n.) 制導；導引；指引。 補充：guide (v.) 引導；inertial guidance = 慣性制導。 例： Similar principles were employed in the development of inertial guidance systems.", "source": "OneDrive_1_2026-4-28\\ch6_Accelerometer_&_Gyroscope_with_replaced_images.pptx", "slide": "60"}, {"term": "ballistic missiles", "meaning": "彈道飛彈", "definition": "(n., pl.) 彈道飛彈。 補充：ballistic (adj.) 彈道的；missile (n.) 飛彈。 例： Similar principles were employed in the development of inertial guidance systems for ballistic missiles.", "source": "OneDrive_1_2026-4-28\\ch6_Accelerometer_&_Gyroscope_with_replaced_images.pptx", "slide": "62"}, {"term": "prime", "meaning": "主要的；首要的；最重要的", "definition": "(adj.) 主要的；首要的；最重要的。 補充：prime minister = 首相；prime component = 關鍵零件。 例： During WWII, the gyroscope became the prime component for aircraft.", "source": "OneDrive_1_2026-4-28\\ch6_Accelerometer_&_Gyroscope_with_replaced_images.pptx", "slide": "63"}, {"term": "miniaturize", "meaning": "使小型化", "definition": "(v.) 使小型化。 補充：miniaturization (n.)、miniature (adj./n.)；課文編號 16。 例： After the war, the race to miniaturize gyroscopes resulted in midget gyroscopes.", "source": "OneDrive_1_2026-4-28\\ch6_Accelerometer_&_Gyroscope_with_replaced_images.pptx", "slide": "64"}, {"term": "manufacturing", "meaning": "製造；製造業", "definition": "(n. / adj.) 製造；製造業。 補充：manufacture (v./n.) 製造；manufacturer (n.) 製造商。 例： The race to miniaturize resulted in the development and manufacturing of midget gyroscopes.", "source": "OneDrive_1_2026-4-28\\ch6_Accelerometer_&_Gyroscope_with_replaced_images.pptx", "slide": "66"}, {"term": "midget", "meaning": "極小的個體 ；極小的", "definition": "(n. / adj.) 極小的個體 (n.)；極小的 (adj.)。 補充：本課指超小型的陀螺儀；課文編號 17。 例： The race to miniaturize resulted in the development of midget gyroscopes.", "source": "OneDrive_1_2026-4-28\\ch6_Accelerometer_&_Gyroscope_with_replaced_images.pptx", "slide": "67"}, {"term": "resulted in", "meaning": "導致；造成 某結果", "definition": "(phr., v.) 導致；造成 (某結果)。 補充：A resulted in B = A 造成 B；注意語序與 result from 相反。 例： The race to miniaturize gyroscopes resulted in the development of midget gyroscopes.", "source": "OneDrive_1_2026-4-28\\ch6_Accelerometer_&_Gyroscope_with_replaced_images.pptx", "slide": "68"}, {"term": "compass", "meaning": "羅盤；指南針", "definition": "(n.) 羅盤；指南針。 補充：compasses (複數)；課文編號 18。 例： In addition to being used in compasses, gyroscopes have been introduced into consumer electronics.", "source": "OneDrive_1_2026-4-28\\ch6_Accelerometer_&_Gyroscope_with_replaced_images.pptx", "slide": "70"}, {"term": "rotation", "meaning": "旋轉；自轉", "definition": "(n.) 旋轉；自轉。 補充：rotate (v.)；rotational (adj.)；p. 73 Families of Vocabulary。 例： The gyroscope allows for the calculation of orientation and rotation.", "source": "OneDrive_1_2026-4-28\\ch6_Accelerometer_&_Gyroscope_with_replaced_images.pptx", "slide": "71"}, {"term": "incorporated", "meaning": "被併入；被納入", "definition": "(v., p.p.) 被併入；被納入。 補充：incorporate (v.) 併入；incorporation (n.) 合併。 例： Designers have incorporated gyroscopes into modern technology.", "source": "OneDrive_1_2026-4-28\\ch6_Accelerometer_&_Gyroscope_with_replaced_images.pptx", "slide": "72"}, {"term": "integration", "meaning": "整合；整併；結合", "definition": "(n.) 整合；整併；結合。 補充：integrate (v.) 整合；integrated (adj.) 整合的。 例： The integration of the gyroscope allows for more accurate recognition of movement.", "source": "OneDrive_1_2026-4-28\\ch6_Accelerometer_&_Gyroscope_with_replaced_images.pptx", "slide": "73"}, {"term": "accurate", "meaning": "精確的；準確的", "definition": "(adj.) 精確的；準確的。 補充：accuracy (n.) 精確度；反義 inaccurate。 例： The gyroscope allows for more accurate recognition of movement within 3D space.", "source": "OneDrive_1_2026-4-28\\ch6_Accelerometer_&_Gyroscope_with_replaced_images.pptx", "slide": "74"}, {"term": "recognition", "meaning": "辨識；識別", "definition": "(n.) 辨識；識別。 補充：recognize (v.) 辨識；motion recognition = 動作辨識。 例： The integration allows for more accurate recognition of movement within 3D space.", "source": "OneDrive_1_2026-4-28\\ch6_Accelerometer_&_Gyroscope_with_replaced_images.pptx", "slide": "75"}, {"term": "previous", "meaning": "先前的；以前的", "definition": "(adj.) 先前的；以前的。 補充：previously (adv.) 先前地；prev- 字根「在…之前」。 例： More accurate recognition than the previous lone accelerometer.", "source": "OneDrive_1_2026-4-28\\ch6_Accelerometer_&_Gyroscope_with_replaced_images.pptx", "slide": "76"}, {"term": "lone", "meaning": "單獨的；單一的", "definition": "(adj.) 單獨的；單一的。 補充：lone = alone/single；課文編號 19。 例： Better than the previous lone accelerometer.", "source": "OneDrive_1_2026-4-28\\ch6_Accelerometer_&_Gyroscope_with_replaced_images.pptx", "slide": "77"}, {"term": "frequently", "meaning": "經常地；頻繁地", "definition": "(adv.) 經常地；頻繁地。 補充：frequency (n.) 頻率；frequent (adj.) 頻繁的。 例： Gyroscopes are frequently combined with accelerometers.", "source": "OneDrive_1_2026-4-28\\ch6_Accelerometer_&_Gyroscope_with_replaced_images.pptx", "slide": "78"}, {"term": "combined", "meaning": "被結合；被合併", "definition": "(v., p.p.) 被結合；被合併。 補充：combine (v.) 結合；combination (n.) 組合。 例： Gyroscopes are frequently combined with accelerometers for more robust sensing.", "source": "OneDrive_1_2026-4-28\\ch6_Accelerometer_&_Gyroscope_with_replaced_images.pptx", "slide": "79"}, {"term": "robust", "meaning": "強健的；穩健的；可靠的", "definition": "(adj.) 強健的；穩健的；可靠的。 補充：robustness (n.) 強健性；課文編號 20。 例： Gyroscopes combined with accelerometers provide more robust direction- and motion-sensing.", "source": "OneDrive_1_2026-4-28\\ch6_Accelerometer_&_Gyroscope_with_replaced_images.pptx", "slide": "80"}, {"term": "direction- and motion-sensing", "meaning": "方向與運動位移感應", "definition": "(n. / adj.) 方向與運動（位移）感應。 補充：Terminology b；direction-sensing + motion-sensing 的複合詞。 例： More robust direction- and motion-sensing requires combining both sensors.", "source": "OneDrive_1_2026-4-28\\ch6_Accelerometer_&_Gyroscope_with_replaced_images.pptx", "slide": "81"}, {"term": "signify", "meaning": "象徵；預示；表示", "definition": "(v.) [ˈsɪɡnə.faɪ] 象徵；預示；表示。 補充：常用於描述某事物代表更深層的意義。 例： A red light signifies danger.", "source": "OneDrive_1_2026-4-28\\ch7_Knowledge_Management_with_replaced_images.pptx", "slide": "3"}, {"term": "strategically", "meaning": "策略性地；有戰略地", "definition": "(adv.) [strəˈtɪdʒɪkḷɪ] 策略性地；有戰略地。 補充：describes actions taken with a long-term plan in mind. 例： The company is strategically positioned in Asia.", "source": "OneDrive_1_2026-4-28\\ch7_Knowledge_Management_with_replaced_images.pptx", "slide": "4"}, {"term": "competence", "meaning": "資格；能力；勝任", "definition": "(n.) [ˈkɑmpətəns] 資格；能力；勝任。 補充：also: 財產、權限（法律語境）。 例： Technical competence is essential for engineers.", "source": "OneDrive_1_2026-4-28\\ch7_Knowledge_Management_with_replaced_images.pptx", "slide": "5"}, {"term": "asset", "meaning": "資產；有價值的事物或人", "definition": "(n.) [ˈæsɛt] 資產；有價值的事物或人。 補充：knowledge can be the most important asset of a firm. 例： Employees are our greatest asset.", "source": "OneDrive_1_2026-4-28\\ch7_Knowledge_Management_with_replaced_images.pptx", "slide": "6"}, {"term": "expertise", "meaning": "專業技術；專門知識", "definition": "(n.) [ɛkspɚˈtiz] 專業技術；專門知識。 補充：often built up through years of practice. 例： She has expertise in data analysis.", "source": "OneDrive_1_2026-4-28\\ch7_Knowledge_Management_with_replaced_images.pptx", "slide": "7"}, {"term": "revalidate", "meaning": "再確認；重新驗證", "definition": "(v.) [riˈvælə.det] 再確認；重新驗證。 補充：re- (再) + validate (確認)。 例： Knowledge must be revalidated regularly.", "source": "OneDrive_1_2026-4-28\\ch7_Knowledge_Management_with_replaced_images.pptx", "slide": "8"}, {"term": "tacit", "meaning": "無言的；緘默的；默示的", "definition": "(adj.) [ˈtæsɪt] 無言的；緘默的；默示的。 補充：hard to articulate; lives in people's heads. 例： Experience produces tacit knowledge.", "source": "OneDrive_1_2026-4-28\\ch7_Knowledge_Management_with_replaced_images.pptx", "slide": "9"}, {"term": "explicit", "meaning": "明確的；清楚表達的", "definition": "(adj.) [ɪkˈsplɪsɪt] 明確的；清楚表達的。 補充：opposite of tacit; written down or documented. 例： The manual gives explicit instructions.", "source": "OneDrive_1_2026-4-28\\ch7_Knowledge_Management_with_replaced_images.pptx", "slide": "10"}, {"term": "accessible", "meaning": "可取得的；易接近的", "definition": "(adj.) [ækˈsɛsəbḷ] 可取得的；易接近的。 補充：access (取用) + -ible (能夠的)。 例： Knowledge should be accessible to all staff.", "source": "OneDrive_1_2026-4-28\\ch7_Knowledge_Management_with_replaced_images.pptx", "slide": "11"}, {"term": "infra", "meaning": "基礎的；基層的常作字首", "definition": "(adj.) [ˈɪnfrə] 基礎的；基層的（常作字首）。 補充：infra- 字首，如 infrastructure 基礎建設。 例： IT infra-structure supports KM.", "source": "OneDrive_1_2026-4-28\\ch7_Knowledge_Management_with_replaced_images.pptx", "slide": "12"}, {"term": "blanket", "meaning": "總括的；全面的；包裹的", "definition": "(adj.) [ˈblænkɪt] 總括的；全面的；包裹的。 補充：a blanket proposal covers everything at once. 例： They rejected the blanket solution.", "source": "OneDrive_1_2026-4-28\\ch7_Knowledge_Management_with_replaced_images.pptx", "slide": "13"}, {"term": "tacit knowledge", "meaning": "內隱知識", "definition": "(n. phr.) 內隱知識。 補充：存在於人腦中、難以文件化的知識。 例： Craftsmanship is mostly tacit knowledge.", "source": "OneDrive_1_2026-4-28\\ch7_Knowledge_Management_with_replaced_images.pptx", "slide": "15"}, {"term": "explicit knowledge", "meaning": "外顯知識", "definition": "(n. phr.) 外顯知識。 補充：可以被寫下、整理、傳遞的知識。 例： Manuals store explicit knowledge.", "source": "OneDrive_1_2026-4-28\\ch7_Knowledge_Management_with_replaced_images.pptx", "slide": "16"}, {"term": "share", "meaning": "分享、分擔；一股股票的基本單位", "definition": "(v. / n.) [ʃɛr] 分享、分擔；一股（股票的基本單位）。 補充：KM emphasizes sharing knowledge across teams. 例： Employees share best practices online.", "source": "OneDrive_1_2026-4-28\\ch7_Knowledge_Management_with_replaced_images.pptx", "slide": "17"}, {"term": "emergence", "meaning": "出現；興起", "definition": "(n.) [ɪˈmɝdʒəns] 出現；興起。 補充：emerge (v.) 的名詞形式。 例： The emergence of the knowledge economy.", "source": "OneDrive_1_2026-4-28\\ch7_Knowledge_Management_with_replaced_images.pptx", "slide": "19"}, {"term": "regarded", "meaning": "被視為；被看作", "definition": "(v., p.p.) [rɪˈɡɑrdɪd] 被視為；被看作。 補充：often used as 'regarded as …'. 例： Knowledge is regarded as a key asset.", "source": "OneDrive_1_2026-4-28\\ch7_Knowledge_Management_with_replaced_images.pptx", "slide": "20"}, {"term": "business sectors", "meaning": "商業部門；產業別", "definition": "(n. phr.) 商業部門；產業別。 補充：e.g., manufacturing, finance, services. 例： KM spans many business sectors.", "source": "OneDrive_1_2026-4-28\\ch7_Knowledge_Management_with_replaced_images.pptx", "slide": "21"}, {"term": "persistently", "meaning": "堅持地；持續地", "definition": "(adv.) [pɚˈsɪstəntlɪ] 堅持地；持續地。 補充：describes continuous, repeated action. 例： The team persistently gathers feedback.", "source": "OneDrive_1_2026-4-28\\ch7_Knowledge_Management_with_replaced_images.pptx", "slide": "23"}, {"term": "ascertain", "meaning": "確定；查明", "definition": "(v.) [ˌæsɚˈten] 確定；查明。 補充：formal synonym of 'find out'. 例： We must ascertain the facts.", "source": "OneDrive_1_2026-4-28\\ch7_Knowledge_Management_with_replaced_images.pptx", "slide": "24"}, {"term": "utilize", "meaning": "利用；使用較正式", "definition": "(v.) [ˈjutḷ.aɪz] 利用；使用（較正式）。 補充：more formal than 'use'. 例： Utilize existing knowledge assets.", "source": "OneDrive_1_2026-4-28\\ch7_Knowledge_Management_with_replaced_images.pptx", "slide": "25"}, {"term": "intellectual", "meaning": "智力的；知識的", "definition": "(adj.) [ˌɪntḷˈɛktʃuəl] 智力的；知識的。 補充：intellectual property = 智慧財產。 例： Intellectual assets drive innovation.", "source": "OneDrive_1_2026-4-28\\ch7_Knowledge_Management_with_replaced_images.pptx", "slide": "26"}, {"term": "assemble", "meaning": "組合；聚集；裝配", "definition": "(v.) [əˈsɛmbḷ] 組合；聚集；裝配。 補充：to bring pieces together into a whole. 例： Assemble the data before analysis.", "source": "OneDrive_1_2026-4-28\\ch7_Knowledge_Management_with_replaced_images.pptx", "slide": "27"}, {"term": "formal", "meaning": "正式的；正規的", "definition": "(adj.) [ˈfɔrmḷ] 正式的；正規的。 補充：opposite of informal. 例： Manuals are a formal way to share knowledge.", "source": "OneDrive_1_2026-4-28\\ch7_Knowledge_Management_with_replaced_images.pptx", "slide": "29"}, {"term": "systematic", "meaning": "系統的；有系統的", "definition": "(adj.) [ˌsɪstəˈmætɪk] 系統的；有系統的。 補充：from 'system'; organized, methodical. 例： Use a systematic approach to document knowledge.", "source": "OneDrive_1_2026-4-28\\ch7_Knowledge_Management_with_replaced_images.pptx", "slide": "30"}, {"term": "documented", "meaning": "有文件記錄的", "definition": "(adj.) [ˈdɑkjəˌmɛntɪd] 有文件記錄的。 補充：documented knowledge = explicit knowledge. 例： Well-documented procedures reduce errors.", "source": "OneDrive_1_2026-4-28\\ch7_Knowledge_Management_with_replaced_images.pptx", "slide": "31"}, {"term": "manuals", "meaning": "手冊；操作指南", "definition": "(n., pl.) [ˈmænjuəlz] 手冊；操作指南。 補充：typical carriers of explicit knowledge. 例： Read the user manuals first.", "source": "OneDrive_1_2026-4-28\\ch7_Knowledge_Management_with_replaced_images.pptx", "slide": "32"}, {"term": "inadequate", "meaning": "不足的；不充分的", "definition": "(adj.) [ɪnˈædəkwɪt] 不足的；不充分的。 補充：in- (不) + adequate (足夠的)。 例： Manuals alone are inadequate.", "source": "OneDrive_1_2026-4-28\\ch7_Knowledge_Management_with_replaced_images.pptx", "slide": "33"}, {"term": "budget", "meaning": "預算", "definition": "(n.) [ˈbʌdʒɪt] 預算。 補充：KM initiatives need their own budget. 例： Allocate a budget for training.", "source": "OneDrive_1_2026-4-28\\ch7_Knowledge_Management_with_replaced_images.pptx", "slide": "35"}, {"term": "infra-structure", "meaning": "基礎設施；基礎建設", "definition": "(n.) [ˈɪnfrəˌstrʌktʃɚ] 基礎設施；基礎建設。 補充：IT infra-structure 支撐 KM 運作。 例： A strong IT infra-structure is needed.", "source": "OneDrive_1_2026-4-28\\ch7_Knowledge_Management_with_replaced_images.pptx", "slide": "36"}, {"term": "proposals", "meaning": "提案；建議書", "definition": "(n., pl.) [prəˈpozḷz] 提案；建議書。 補充：propose (v.) + -al (n.)。 例： Submit KM proposals to management.", "source": "OneDrive_1_2026-4-28\\ch7_Knowledge_Management_with_replaced_images.pptx", "slide": "37"}, {"term": "priorities", "meaning": "優先事項；優先順序", "definition": "(n., pl.) [praɪˈɔrətɪz] 優先事項；優先順序。 補充：singular form: priority. 例： Set clear priorities for the project.", "source": "OneDrive_1_2026-4-28\\ch7_Knowledge_Management_with_replaced_images.pptx", "slide": "38"}, {"term": "know-how", "meaning": "技術知識；實務竅門", "definition": "(n.) [ˈnoˌhaʊ] 技術知識；實務竅門。 補充：often used to describe tacit skills. 例： Engineers build up know-how on the job.", "source": "OneDrive_1_2026-4-28\\ch7_Knowledge_Management_with_replaced_images.pptx", "slide": "40"}, {"term": "impractical", "meaning": "不切實際的；行不通的", "definition": "(adj.) [ɪmˈpræktɪkḷ] 不切實際的；行不通的。 補充：im- (不) + practical (實用的)。 例： Sharing all tacit knowledge is impractical.", "source": "OneDrive_1_2026-4-28\\ch7_Knowledge_Management_with_replaced_images.pptx", "slide": "41"}, {"term": "competitive advantage", "meaning": "競爭優勢", "definition": "(n. phr.) 競爭優勢。 補充：core concept in business strategy. 例： KM can be a source of competitive advantage.", "source": "OneDrive_1_2026-4-28\\ch7_Knowledge_Management_with_replaced_images.pptx", "slide": "42"}, {"term": "linchpin", "meaning": "關鍵；樞紐人物/要素", "definition": "(n.) [ˈlɪntʃˌpɪn] 關鍵；樞紐人物/要素。 補充：出自參考文獻 Webb 1998。 例： Trust is the linchpin of KM.", "source": "OneDrive_1_2026-4-28\\ch7_Knowledge_Management_with_replaced_images.pptx", "slide": "43"}, {"term": "implementation plan", "meaning": "實施計畫；執行計畫", "definition": "(n. phr.) 實施計畫；執行計畫。 補充：translates strategy into concrete steps. 例： Draft an implementation plan for KM.", "source": "OneDrive_1_2026-4-28\\ch7_Knowledge_Management_with_replaced_images.pptx", "slide": "44"}, {"term": "short-term needs", "meaning": "短期需求", "definition": "(n. phr.) 短期需求。 補充：often contrasted with long-term needs. 例： Address short-term needs first.", "source": "OneDrive_1_2026-4-28\\ch7_Knowledge_Management_with_replaced_images.pptx", "slide": "45"}, {"term": "traditional economy", "meaning": "傳統經濟", "definition": "(n. phr.) 傳統經濟。 補充：based mainly on land, labor, and capital. 例： The traditional economy valued physical assets.", "source": "OneDrive_1_2026-4-28\\ch7_Knowledge_Management_with_replaced_images.pptx", "slide": "46"}, {"term": "knowledge economy", "meaning": "知識經濟", "definition": "(n. phr.) 知識經濟。 補充：value comes from knowledge and information. 例： We live in a knowledge economy.", "source": "OneDrive_1_2026-4-28\\ch7_Knowledge_Management_with_replaced_images.pptx", "slide": "47"}, {"term": "point of responsibility", "meaning": "權責單位；負責單位/對象", "definition": "(n. phr.) 權責單位；負責單位/對象。 補充：the role or team accountable for KM. 例： Every KM initiative needs a point of responsibility.", "source": "OneDrive_1_2026-4-28\\ch7_Knowledge_Management_with_replaced_images.pptx", "slide": "48"}]</script>
+  <script>
+    const DATA = JSON.parse(document.getElementById('vocab-data').textContent);
+    const $ = (selector) => document.querySelector(selector);
+    const $$ = (selector) => Array.from(document.querySelectorAll(selector));
+
+    const els = {
+      datasetLabel: $('#datasetLabel'),
+      quizTab: $('#quizTab'),
+      listTab: $('#listTab'),
+      quizView: $('#quizView'),
+      listView: $('#listView'),
+      modeSelect: $('#modeSelect'),
+      chapterSelect: $('#chapterSelect'),
+      listChapterSelect: $('#listChapterSelect'),
+      countSelect: $('#countSelect'),
+      startBtn: $('#startBtn'),
+      quizTitle: $('#quizTitle'),
+      quizSubtitle: $('#quizSubtitle'),
+      questionLabel: $('#questionLabel'),
+      questionText: $('#questionText'),
+      sourceText: $('#sourceText'),
+      choiceArea: $('#choiceArea'),
+      typingArea: $('#typingArea'),
+      typingInput: $('#typingInput'),
+      typingAnswer: $('#typingAnswer'),
+      feedback: $('#feedback'),
+      showAnswerBtn: $('#showAnswerBtn'),
+      nextBtn: $('#nextBtn'),
+      meterFill: $('#meterFill'),
+      progressText: $('#progressText'),
+      scoreStat: $('#scoreStat'),
+      doneStat: $('#doneStat'),
+      rateStat: $('#rateStat'),
+      leftStat: $('#leftStat'),
+      searchInput: $('#searchInput'),
+      listCount: $('#listCount'),
+      wordRows: $('#wordRows'),
+    };
+
+    const state = {
+      mode: 'meaning-to-term',
+      chapter: 'all',
+      questions: [],
+      options: [],
+      index: 0,
+      score: 0,
+      answered: false,
+      wrong: [],
+      current: null,
+    };
+
+    function escapeHtml(value) {
+      return String(value || '').replace(/[&<>"']/g, char => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;',
+      }[char]));
+    }
+
+    function chapterOf(entry) {
+      const text = entry.source || '';
+      const match = text.match(/ch\s*(\d+)/i);
+      return match ? `Ch${match[1]}` : '其他';
+    }
+
+    function sourceLabel(entry) {
+      const source = (entry.source || '').split(/[\\/]/).pop() || 'PPT';
+      return `${chapterOf(entry)} · Slide ${entry.slide || '?'} · ${source}`;
+    }
+
+    function shuffle(items) {
+      const copy = [...items];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    function normalizeAnswer(text) {
+      return String(text || '').trim().toLowerCase().replace(/\s+/g, ' ');
+    }
+
+    function currentPool() {
+      return DATA.filter(entry => state.chapter === 'all' || chapterOf(entry) === state.chapter);
+    }
+
+    function optionText(entry) {
+      return state.mode === 'term-to-meaning' ? entry.meaning : entry.term;
+    }
+
+    function questionText(entry) {
+      if (state.mode === 'term-to-meaning') return entry.term;
+      return entry.meaning;
+    }
+
+    function answerText(entry) {
+      if (state.mode === 'term-to-meaning') return entry.meaning;
+      return entry.term;
+    }
+
+    function modeTitle(mode = state.mode) {
+      return {
+        'meaning-to-term': '看中文選英文',
+        'term-to-meaning': '看英文選中文',
+        'typing': '中翻英打字',
+      }[mode];
+    }
+
+    function buildChapterOptions() {
+      const chapters = [...new Set(DATA.map(chapterOf))].sort((a, b) => {
+        const an = Number(a.replace(/\D/g, '')) || 999;
+        const bn = Number(b.replace(/\D/g, '')) || 999;
+        return an - bn || a.localeCompare(b);
+      });
+
+      const options = ['<option value="all">全部章節</option>', ...chapters.map(ch => `<option value="${ch}">${ch}</option>`)].join('');
+      els.chapterSelect.innerHTML = options;
+      els.listChapterSelect.innerHTML = options;
+    }
+
+    function startQuiz() {
+      state.mode = els.modeSelect.value;
+      state.chapter = els.chapterSelect.value;
+      const pool = currentPool();
+      const wanted = els.countSelect.value === 'all' ? pool.length : Number(els.countSelect.value);
+      state.questions = shuffle(pool).slice(0, Math.min(wanted, pool.length));
+      state.index = 0;
+      state.score = 0;
+      state.answered = false;
+      state.wrong = [];
+      setActiveModeButton();
+      renderQuiz();
+    }
+
+    function buildChoiceQuestion(entry) {
+      const pool = currentPool().filter(item => item.term !== entry.term && optionText(item));
+      const options = shuffle([entry, ...shuffle(pool).slice(0, 3)]);
+      return options;
+    }
+
+    function renderQuiz() {
+      els.quizTitle.textContent = modeTitle();
+      els.quizSubtitle.textContent = `${state.chapter === 'all' ? '全部章節' : state.chapter} · ${currentPool().length} 個單字/片語`;
+      renderStats();
+
+      if (!state.questions.length) {
+        els.questionText.textContent = '這個範圍沒有可用單字';
+        els.choiceArea.innerHTML = '';
+        els.typingArea.classList.add('hidden');
+        els.sourceText.textContent = '';
+        els.feedback.textContent = '';
+        return;
+      }
+
+      if (state.index >= state.questions.length) {
+        renderSummary();
+        return;
+      }
+
+      const entry = state.questions[state.index];
+      state.current = entry;
+      state.answered = false;
+      els.feedback.textContent = '';
+      els.feedback.className = 'feedback';
+      els.typingAnswer.textContent = '';
+      els.typingInput.value = '';
+      els.nextBtn.textContent = '下一題';
+      els.showAnswerBtn.classList.toggle('hidden', state.mode !== 'typing');
+      els.questionLabel.textContent = state.mode === 'term-to-meaning' ? '英文單字' : '中文意思';
+      els.questionText.textContent = questionText(entry);
+      els.sourceText.textContent = sourceLabel(entry);
+      updateProgress();
+
+      if (state.mode === 'typing') {
+        els.choiceArea.classList.add('hidden');
+        els.typingArea.classList.remove('hidden');
+        window.setTimeout(() => els.typingInput.focus(), 50);
+        return;
+      }
+
+      els.choiceArea.classList.remove('hidden');
+      els.typingArea.classList.add('hidden');
+      const options = buildChoiceQuestion(entry);
+      state.options = options;
+      els.choiceArea.innerHTML = options.map((option, index) => `
+        <button class="option" type="button" data-option-index="${index}">
+          <strong>${index + 1}.</strong> ${escapeHtml(optionText(option))}
+        </button>
+      `).join('');
+    }
+
+    function answerChoice(optionIndex) {
+      if (state.answered || !state.current) return;
+      const picked = state.options[Number(optionIndex)];
+      if (!picked) return;
+      state.answered = true;
+      const correct = picked.term === state.current.term;
+      if (correct) {
+        state.score += 1;
+        els.feedback.textContent = '答對';
+        els.feedback.className = 'feedback good';
+      } else {
+        state.wrong.push(state.current);
+        els.feedback.textContent = `答錯，答案是：${answerText(state.current)}`;
+        els.feedback.className = 'feedback bad';
+      }
+
+      $$('.option').forEach(button => {
+        const option = state.options[Number(button.dataset.optionIndex)];
+        const isCorrect = option && option.term === state.current.term;
+        const isPicked = option && option.term === picked.term;
+        button.disabled = true;
+        if (isCorrect) button.classList.add('correct');
+        if (isPicked && !isCorrect) button.classList.add('wrong');
+      });
+      renderStats();
+    }
+
+    function answerTyping(showOnly = false) {
+      if (!state.current) return;
+      const expected = normalizeAnswer(state.current.term);
+      const typed = normalizeAnswer(els.typingInput.value);
+      const correct = typed === expected;
+
+      if (showOnly) {
+        els.typingAnswer.textContent = `答案：${state.current.term}`;
+        return;
+      }
+
+      if (state.answered) return;
+      state.answered = true;
+      if (correct) {
+        state.score += 1;
+        els.feedback.textContent = '答對';
+        els.feedback.className = 'feedback good';
+      } else {
+        state.wrong.push(state.current);
+        els.feedback.textContent = '答錯';
+        els.feedback.className = 'feedback bad';
+      }
+      els.typingAnswer.textContent = `答案：${state.current.term}`;
+      renderStats();
+    }
+
+    function nextQuestion() {
+      if (state.index >= state.questions.length) {
+        startQuiz();
+        return;
+      }
+      if (state.mode === 'typing' && !state.answered) {
+        answerTyping(false);
+        return;
+      }
+      if (!state.answered && state.mode !== 'typing') {
+        els.feedback.textContent = '先選一個答案';
+        return;
+      }
+      state.index += 1;
+      renderQuiz();
+    }
+
+    function renderSummary() {
+      const total = state.questions.length;
+      const rate = total ? Math.round((state.score / total) * 100) : 0;
+      updateProgress(true);
+      els.sourceText.textContent = '';
+      els.choiceArea.classList.remove('hidden');
+      els.typingArea.classList.add('hidden');
+      els.showAnswerBtn.classList.add('hidden');
+      els.feedback.textContent = '';
+      els.questionLabel.textContent = '完成';
+      els.questionText.textContent = `${state.score} / ${total}`;
+      els.choiceArea.innerHTML = `
+        <div class="summary" style="grid-column: 1 / -1">
+          <div><strong>${rate}%</strong><span>正確率</span></div>
+          ${state.wrong.length ? `<div class="miss-list">${state.wrong.map(item => `<div><b>${escapeHtml(item.term)}</b>：${escapeHtml(item.meaning)}</div>`).join('')}</div>` : '<p>這輪全部答對。</p>'}
+        </div>
+      `;
+      els.nextBtn.textContent = '再考一次';
+      renderStats();
+    }
+
+    function updateProgress(done = false) {
+      const total = state.questions.length || 0;
+      const doneCount = done ? total : Math.min(state.index, total);
+      const percent = total ? Math.round((doneCount / total) * 100) : 0;
+      els.meterFill.style.width = `${percent}%`;
+      els.progressText.textContent = `${doneCount} / ${total}`;
+    }
+
+    function renderStats() {
+      const total = state.questions.length;
+      const done = Math.min(state.index + (state.answered ? 1 : 0), total);
+      const left = Math.max(total - done, 0);
+      const rate = done ? Math.round((state.score / done) * 100) : 0;
+      els.scoreStat.textContent = state.score;
+      els.doneStat.textContent = done;
+      els.rateStat.textContent = `${rate}%`;
+      els.leftStat.textContent = left;
+    }
+
+    function setMode(mode) {
+      state.mode = mode;
+      els.modeSelect.value = mode;
+      setActiveModeButton();
+      startQuiz();
+    }
+
+    function setActiveModeButton() {
+      $$('.segmented button').forEach(button => {
+        button.classList.toggle('active', button.dataset.mode === els.modeSelect.value);
+      });
+    }
+
+    function showView(view) {
+      const isQuiz = view === 'quiz';
+      els.quizView.classList.toggle('hidden', !isQuiz);
+      els.listView.classList.toggle('hidden', isQuiz);
+      els.quizTab.classList.toggle('active', isQuiz);
+      els.listTab.classList.toggle('active', !isQuiz);
+      if (!isQuiz) renderList();
+    }
+
+    function renderList() {
+      const keyword = normalizeAnswer(els.searchInput.value);
+      const chapter = els.listChapterSelect.value;
+      const rows = DATA.filter(entry => {
+        const inChapter = chapter === 'all' || chapterOf(entry) === chapter;
+        const haystack = normalizeAnswer(`${entry.term} ${entry.meaning} ${entry.source}`);
+        return inChapter && (!keyword || haystack.includes(keyword));
+      });
+      els.listCount.textContent = `${rows.length} 個單字/片語`;
+      els.wordRows.innerHTML = rows.slice(0, 500).map(entry => `
+        <tr>
+          <td><strong>${escapeHtml(entry.term)}</strong></td>
+          <td>${escapeHtml(entry.meaning)}</td>
+          <td>${escapeHtml(chapterOf(entry))} · ${escapeHtml(entry.slide || '?')}</td>
+        </tr>
+      `).join('');
+    }
+
+    els.datasetLabel.textContent = `${DATA.length} 個單字/片語`;
+    buildChapterOptions();
+    startQuiz();
+
+    els.startBtn.addEventListener('click', startQuiz);
+    els.modeSelect.addEventListener('change', () => setMode(els.modeSelect.value));
+    els.chapterSelect.addEventListener('change', startQuiz);
+    els.countSelect.addEventListener('change', startQuiz);
+    els.nextBtn.addEventListener('click', nextQuestion);
+    els.showAnswerBtn.addEventListener('click', () => answerTyping(true));
+    els.choiceArea.addEventListener('click', event => {
+      const button = event.target.closest('.option');
+      if (button) answerChoice(button.dataset.optionIndex);
+    });
+    els.typingInput.addEventListener('keydown', event => {
+      if (event.key === 'Enter') nextQuestion();
+    });
+    els.quizTab.addEventListener('click', () => showView('quiz'));
+    els.listTab.addEventListener('click', () => showView('list'));
+    els.searchInput.addEventListener('input', renderList);
+    els.listChapterSelect.addEventListener('change', renderList);
+    $$('.segmented button').forEach(button => {
+      button.addEventListener('click', () => setMode(button.dataset.mode));
+    });
+    document.addEventListener('keydown', event => {
+      if (state.mode === 'typing') return;
+      if (/^[1-4]$/.test(event.key)) {
+        const option = $$('.option')[Number(event.key) - 1];
+        if (option) answerChoice(option.dataset.optionIndex);
+      }
+      if (event.key === 'Enter') nextQuestion();
+    });
+  </script>
+</body>
+</html>
